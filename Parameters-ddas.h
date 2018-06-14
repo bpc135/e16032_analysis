@@ -482,8 +482,10 @@ class bdecayLaBr3: public TObject
   double energy[17];
   double goodenergy[17];
   double ecal[17];
-  double amplitude[17];
+  double amp[17];
+  double amp_scaled[17];
   double area[17];
+  double area_scaled[17];
   
 
   int mult;

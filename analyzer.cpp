@@ -207,10 +207,10 @@ void analyze_event(int crateid, int slotid, int channum, vector<UShort_t> trace,
   if (crateid == 0) modnum = slotid - 2;
   if (crateid == 1) modnum = slotid + 11;
 
-  if(crateid > 1 || slotid > 14 || channum > 15){
-    cout<<"ID problem in analyze_event"<<endl;
-    cout<<"Crate: "<<crateid<<" Slot: "<<slotid<<" Channel: "<<channum<<endl;
-  }
+  // if(crateid > 1 || slotid > 14 || channum > 15){
+  //   cout<<"ID problem in analyze_event"<<endl;
+  //   cout<<"Crate: "<<crateid<<" Slot: "<<slotid<<" Channel: "<<channum<<endl;
+  // }
 
   //array declaring the type of module:
   //0 = 100-12 (100 MSPS, 12 bit)
@@ -486,6 +486,12 @@ void analyze_event(int crateid, int slotid, int channum, vector<UShort_t> trace,
     bdecay->labr3.eventtdc[detnum] = (currenttime - starttime) + 3000.;
     bdecay->labr3.ecal[detnum] = (bdecayv->labr3.square[detnum]*bdecay->labr3.energy[detnum]*bdecay->labr3.energy[detnum]) + (bdecayv->labr3.slope[detnum]*bdecay->labr3.energy[detnum]) + bdecayv->labr3.intercept[detnum];
     bdecay->labr3.mult++;
+
+    //trace analysis
+    bdecay->labr3.amp[detnum] = amplitude;
+    bdecay->labr3.amp_scaled[detnum] = amplitude_scaled;
+    bdecay->labr3.area[detnum] = area;
+    bdecay->labr3.area_scaled[detnum] = area_scaled;
     
   }
 
@@ -676,7 +682,7 @@ void analyze_event(int crateid, int slotid, int channum, vector<UShort_t> trace,
     //pix = (channum * 16) + (15 - rownum);
     pix = (ypix * 16) + xpix + 1;
     //if(id >= 64 && id < 80){
-    // if (xpix == 0 && ypix == 0){
+    // if (pix == 1){
     //   cout << "id = " << id << ", xpix = " << xpix << ", ypix = " << ypix << ", pix = " << pix << endl;
     // }
     //cebr3E[channum][15-rownum] = bdecay->adc[adcnumber].channel[channum];

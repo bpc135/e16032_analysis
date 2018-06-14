@@ -438,8 +438,10 @@ void bdecayLaBr3::Reset()
   memset(time, 0, 17*sizeof(double));
   //initialize the differences to -10000000 so we know when it wasn't set
   memset(tdiff, 100000, 17*17*sizeof(double));
-  memset(amplitude,-1,17*sizeof(double));
+  memset(amp,-1,17*sizeof(double));
+  memset(amp_scaled,-1,17*sizeof(double));
   memset(area,0,17*sizeof(double));
+  memset(area_scaled,0,17*sizeof(double));
   //initialize the differences to -10000000 so we know when it wasn't set
   memset(dynode_tdiff, 100000, 17*sizeof(double));
   //add in parameters that output the CFD filter time + trigger point

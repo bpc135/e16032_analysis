@@ -120,9 +120,9 @@ int unpack_data(TTree *tree_in, TTree *tree_out, string Run_Number ) {
       cout << "Events processed " << ii << " - percent done " << (int)(ii/oneper)*1 << "%"<<endl;
     }
     //check with only 5% of the file
-    if( (ii > 0) && (ii % fiveper) == 0) {
-      break;
-    }
+    // if( (ii > 0) && (ii % fiveper) == 0) {
+    //   break;
+    // }
 
     //Reset the channel list from the last event
     reset_channel_list(channellist,channellist_it);
@@ -143,7 +143,7 @@ int unpack_data(TTree *tree_in, TTree *tree_out, string Run_Number ) {
 
     //Unpack the event
     unpack_event(ii,&bdecay,&bdecayv,channellist,channellist_it);
-
+  
     //Reset root output
     rootout->Reset();
 
@@ -311,75 +311,151 @@ int unpack_event(int eventnum, betadecay *bdecay, betadecayvariables *bdecayv,ve
   }
     
   //Determine x and y positions for pspmt
-  double asum50, aampsum50, aareasum50 = 0.0;
-  for(int i=1; i<258; i++){
-    int xpix = (i % 16);
-    int ypix = ((i-1) / 16);
-    // if(bdecay->pspmt.aecal[i] > 0 && i > 240 && i <= 256){
-    //   cout << "xpix = " << xpix << ", ypix = " << ypix << ", pix = " << i << ", pspmt.aecal["<<i<<"] = " << bdecay->pspmt.aecal[i] << endl;
-    // }
+  double asumcent, asumcent50, aampsumcent, aampsumcent50, aareasumcent, aareasumcent50, amaxcent, aampmaxcent, aampmaxcent_scaled, aareacent, aareamaxcent,aareamaxcent_scaled = 0.0;
 
+  //first determine maxima within the intended thresholds for the centroid determinations
+  for(int i=1; i<257; i++){
+      
     //pixie energies
     if(bdecay->pspmt.aecal[i] > 0 && bdecay->pspmt.aecal[i] < 30000){
 
       bdecay->pspmt.amult++;
       bdecayv->hit.pspmt = 1;
-      
-      bdecay->pspmt.posxEcent += xpix * bdecay->pspmt.aecal[i];
-      bdecay->pspmt.posyEcent += ypix * bdecay->pspmt.aecal[i];
-      bdecay->pspmt.asum += bdecay->pspmt.aecal[i];
-
-      //calculate the centroids using 50% of maximum anode values
-      if(bdecay->pspmt.aecal[i] > (0.5 * bdecay->pspmt.amax)){
-	bdecay->pspmt.posxEcent50 += xpix * bdecay->pspmt.aecal[i];
-	bdecay->pspmt.posyEcent50 += ypix * bdecay->pspmt.aecal[i];
-	asum50 += bdecay->pspmt.aecal[i];
+      if(bdecay->pspmt.aecal[i] > amaxcent){
+	amaxcent = bdecay->pspmt.aecal[i];
       }
+
     }
+
     //amplitudes
     if(bdecay->pspmt.aamp[i] > 0) {
+
+      if(bdecay->pspmt.aamp_scaled[i] > aampmaxcent_scaled){
+	aampmaxcent_scaled = bdecay->pspmt.aamp_scaled[i];
+      }
+      if(bdecay->pspmt.aamp[i] > amaxcent){
+	amaxcent = bdecay->pspmt.aamp[i];
+      }
       
+    }
+    
+    //areas
+    if(bdecay->pspmt.aarea[i] > 0){
+      if(bdecay->pspmt.aarea_scaled[i] > aareamaxcent_scaled){
+	aareamaxcent_scaled = bdecay->pspmt.aarea_scaled[i];
+      }
+      if(bdecay->pspmt.aarea[i] > amaxcent){
+	amaxcent = bdecay->pspmt.aarea[i];
+      }
+
+    }
+
+  }
+
+  for(int i = 1; i < 257; i++){
+
+    int xpix = (int)((i-1) % 16);
+    int ypix = (int)((i-1) / 16);
+
+    if(bdecay->pspmt.aecal[i] > 0 && bdecay->pspmt.aecal[i] < 30000){
+
+      //pixieEcent
+      bdecay->pspmt.posxEcent += xpix * bdecay->pspmt.aecal[i];
+      bdecay->pspmt.posyEcent += ypix * bdecay->pspmt.aecal[i];
+      asumcent += bdecay->pspmt.aecal[i];
+    
+      //calculate the centroids using 50% of maximum anode values
+      if(bdecay->pspmt.aecal[i] > (0.50 * amaxcent)){
+	bdecay->pspmt.posxEcent50 += xpix * bdecay->pspmt.aecal[i];
+	bdecay->pspmt.posyEcent50 += ypix * bdecay->pspmt.aecal[i];
+	asumcent50 += bdecay->pspmt.aecal[i];
+      }
+
+      //pixie amplitudes cent
       bdecay->pspmt.posxampcent += xpix * bdecay->pspmt.aamp_scaled[i];
       bdecay->pspmt.posyampcent += ypix * bdecay->pspmt.aamp_scaled[i];
-      bdecay->pspmt.aampsum += bdecay->pspmt.aamp_scaled[i];
+      aampsumcent += bdecay->pspmt.aamp_scaled[i];
 
       //calculate the centroids using 50% of maximum anode values
       if(bdecay->pspmt.aamp_scaled[i] > (0.5 * bdecay->pspmt.aampmax)){
+	
 	bdecay->pspmt.posxampcent50 += xpix * bdecay->pspmt.aamp_scaled[i];
 	bdecay->pspmt.posyampcent50 += ypix * bdecay->pspmt.aamp_scaled[i];
-	aampsum50 += bdecay->pspmt.aamp_scaled[i];
+	aampsumcent50 += bdecay->pspmt.aamp_scaled[i];
       }
-    }
-    //areas
-    if(bdecay->pspmt.aarea[i] > 0){
+
+      //pixie areas cent
       bdecay->pspmt.posxareacent += xpix * bdecay->pspmt.aarea_scaled[i];
       bdecay->pspmt.posyareacent += ypix * bdecay->pspmt.aarea_scaled[i];
-      bdecay->pspmt.aareasum += bdecay->pspmt.aarea_scaled[i];
-
+      aareasumcent += bdecay->pspmt.aarea_scaled[i];
+      
       //calculate the centroids using 50% of maximum anode values
       if(bdecay->pspmt.aarea_scaled[i] > (0.5 * bdecay->pspmt.aareamax)){
 	bdecay->pspmt.posxareacent50 += xpix * bdecay->pspmt.aarea_scaled[i];
 	bdecay->pspmt.posyareacent50 += ypix * bdecay->pspmt.aarea_scaled[i];
-	aareasum50 += bdecay->pspmt.aarea_scaled[i];
+	aareasumcent50 += bdecay->pspmt.aarea_scaled[i];
       }
     }
+  }
+
+  //checking energies of anodes
+  if(eventnum == 1763){
+    cout << "event = " << eventnum << endl;
+    cout << asumcent << endl;
+    cout << "posxEcent = " << bdecay->pspmt.posxEcent << endl;
+
+    int cebr3E[16][16];
+    for(int ii = 0; ii < 16; ii++){
+      for(int jj = 0; jj < 16; jj++){
+	cebr3E[ii][jj] = 0;
+      }
+    }
+    int xpix1,ypix1;
+    for(int i = 1; i < 258; i++){
+      if(bdecay->pspmt.aecal[i] > 0 && bdecay->pspmt.aecal[i] < 30000){
+	
+  	xpix1 = (int)((i-1) % 16);
+	ypix1 = (int)((i-1) / 16);
+  	//cout << "aenergy[" << xpix1 <<"][" << ypix1 << "] = " << bdecay->pspmt.aenergy[i] << endl;
+	
+	cebr3E[xpix1][ypix1] = bdecay->pspmt.aenergy[i];
+      }
+    }
+    // for(int ii = 0; ii < 16; ii++){
+    //   for(int jj = 0; jj < 16; jj++){
+    // 	// if(cebr3E[ii][jj] > 0){
+    // 	//   cout << "aenergy[" << ii <<"][" << jj << "] = " << cebr3E[ii][jj] << endl;
+	  
+    // 	// }
+    //   }
+    // }
+    cout << bdecay->pspmt.posxEcent50 << " " << bdecay->pspmt.posyEcent50 << endl;
     
   }
 
+  // if(bdecay->pspmt.posxEcent50 < 0.1 && bdecay->pspmt.posyEcent50){
+  //   cout << "asum50 = " << asum50 << ", amax = " <<  bdecay->pspmt.amax << ", amaxx = " << bdecay->pspmt.amaxx << ", amaxy = " << bdecay->pspmt.amaxy << endl;
+  // }
+  
   //calculate final centroid value
-  bdecay->pspmt.posxEcent = bdecay->pspmt.posxEcent / bdecay->pspmt.asum;
-  bdecay->pspmt.posyEcent = bdecay->pspmt.posyEcent / bdecay->pspmt.asum;
-  bdecay->pspmt.posxEcent50 = bdecay->pspmt.posxEcent50 / asum50;
-  bdecay->pspmt.posyEcent50 = bdecay->pspmt.posyEcent50 / asum50;
-  bdecay->pspmt.posxampcent = bdecay->pspmt.posxampcent / bdecay->pspmt.aampsum;
-  bdecay->pspmt.posyampcent = bdecay->pspmt.posyampcent / bdecay->pspmt.aampsum;
-  bdecay->pspmt.posxampcent50 = bdecay->pspmt.posxampcent50 / aampsum50;
-  bdecay->pspmt.posyampcent50 = bdecay->pspmt.posyampcent50 / aampsum50;
-  bdecay->pspmt.posxareacent = bdecay->pspmt.posxareacent / bdecay->pspmt.aareasum;
-  bdecay->pspmt.posyareacent = bdecay->pspmt.posyareacent / bdecay->pspmt.aareasum;
-  bdecay->pspmt.posxareacent50 = bdecay->pspmt.posxareacent50 / aareasum50;
-  bdecay->pspmt.posyareacent50 = bdecay->pspmt.posyareacent50 / aareasum50;
+  bdecay->pspmt.posxEcent = bdecay->pspmt.posxEcent / asumcent;
+  bdecay->pspmt.posyEcent = bdecay->pspmt.posyEcent / asumcent;
+  bdecay->pspmt.posxEcent50 = bdecay->pspmt.posxEcent50 / asumcent50;
+  bdecay->pspmt.posyEcent50 = bdecay->pspmt.posyEcent50 / asumcent50;
+  bdecay->pspmt.posxampcent = bdecay->pspmt.posxampcent / aampsumcent;
+  bdecay->pspmt.posyampcent = bdecay->pspmt.posyampcent / aampsumcent;
+  bdecay->pspmt.posxampcent50 = bdecay->pspmt.posxampcent50 / aampsumcent50;
+  bdecay->pspmt.posyampcent50 = bdecay->pspmt.posyampcent50 / aampsumcent50;
+  bdecay->pspmt.posxareacent = bdecay->pspmt.posxareacent / aareasumcent;
+  bdecay->pspmt.posyareacent = bdecay->pspmt.posyareacent / aareasumcent;
+  bdecay->pspmt.posxareacent50 = bdecay->pspmt.posxareacent50 / aareasumcent50;
+  bdecay->pspmt.posyareacent50 = bdecay->pspmt.posyareacent50 / aareasumcent50;
 
+  if(eventnum == 1763){
+    cout << "final posxEcent = " << bdecay->pspmt.posxEcent << endl;
+    cout << "posxEcent50 = " << bdecay->pspmt.posxEcent50 << endl;
+  }
+  
   //Only fill this stuff for the low ("lo") gain things
   if ((bdecayv->hit.pin01 == 1) && bdecay->pspmt.dyamp > 0) {
     
@@ -394,8 +470,8 @@ int unpack_event(int eventnum, betadecay *bdecay, betadecayvariables *bdecayv,ve
     for(int i=1;i<258;i++){
 
       //     cout<<"Event: "<<eventnum<<"  "<<i<<"  Anode Amp: "<<bdecay->pspmt.aamp[i]<<"  Anode Area: "<<bdecay->pspmt.aarea[i]<<" Area/Amp: "<<bdecay->pspmt.aarea[i]/bdecay->pspmt.aamp[i]<<"  "<<bdecay->pspmt.baseline[i]<<"  "<<bdecay->pspmt.lowpoint[i]<<"  "<<(bdecay->pspmt.baseline[i]-bdecay->pspmt.lowpoint[i])/bdecay->pspmt.aamp[i]<<"  Mult: "<<   bdecay->pspmt.pixmult[i]<<endl;
-      int xpix = (i % 16);
-      int ypix = ((i-1) / 16);
+      int xpix = (int)((i-1) % 16);
+      int ypix = (int)((i-1) / 16);
       
       bdecay->pspmt.loamult++;
 
@@ -463,6 +539,8 @@ int unpack_event(int eventnum, betadecay *bdecay, betadecayvariables *bdecayv,ve
     bdecay->pspmt.loposyareacent = bdecay->pspmt.loposyareacent / bdecay->pspmt.loaareasum;
     bdecay->pspmt.loposxareacent50 = bdecay->pspmt.loposxareacent50 / loaareasum50;
     bdecay->pspmt.loposyareacent50 = bdecay->pspmt.loposyareacent50 / loaareasum50;
+
+    
 
     //relic from e14057: leaving as a reminder that looking at ratios of areas to amplitudes can
     //help understand the overflows
