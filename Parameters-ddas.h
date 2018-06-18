@@ -339,9 +339,7 @@ class bdecayPSPMT: public TObject
   double dyenergy;
   double dyecal;
   double dyamp;
-  double dyamp_scaled;
   double dyarea;
-  double dyarea_scaled;
   int dyoverflow;
   double dytime;
   double dytdiff;  //time difference between dynode and anode with highest amplitude
@@ -358,6 +356,7 @@ class bdecayPSPMT: public TObject
   double asum;
   double atime[258];
   double amax;
+  int aoverflow[258];
   int amult;
   int amaxx;
   int amaxy;
@@ -366,8 +365,12 @@ class bdecayPSPMT: public TObject
   double posyEcent;
   double posxEcent50;
   double posyEcent50;
+  double amaxcent;
+  double asumcent;
+  double asumcent50;
+  
   double aamp[258];
-  double aamp_scaled[258];
+  double aampcal[258];
   double aampsum;
   int aampmax;
   int aampmaxx;
@@ -377,8 +380,13 @@ class bdecayPSPMT: public TObject
   double posyampcent;
   double posxampcent50;
   double posyampcent50;
+  double aampmaxcent;
+  double aampmaxcentcal;
+  double aampsumcent;
+  double aampsumcent50;
+  
   double aarea[258];
-  double aarea_scaled[258];
+  double aareacal[258];
   double aareasum;
   int aareamax;
   int aareamaxx;
@@ -388,17 +396,24 @@ class bdecayPSPMT: public TObject
   double posyareacent;
   double posxareacent50;
   double posyareacent50;
+  double aareamaxcent;
+  double aareamaxcentcal;
+  double aareasumcent;
+  double aareasumcent50;
+  
   double lowpoint[258];
   double baseline[258];
   double ratio[258];
+
   int pixmult[258];
+  
   double loaenergy[258];
   double loaecal[258];
   double loaamp[258];
-  double loaamp_scaled[258];
+  double loaampcal[258];
   double loaampsum;
   double loaarea[258];
-  double loaarea_scaled[258];
+  double loaareacal[258];
   double loaareasum;
   double loasum;
   double loatime[258];
@@ -483,9 +498,9 @@ class bdecayLaBr3: public TObject
   double goodenergy[17];
   double ecal[17];
   double amp[17];
-  double amp_scaled[17];
+  double ampcal[17];
   double area[17];
-  double area_scaled[17];
+  double areacal[17];
   
 
   int mult;
@@ -525,6 +540,66 @@ class bdecayLaBr3Total: public TObject
   void Reset();
   
   ClassDef(bdecayLaBr3Total,1);
+};
+
+/* CLYC */
+class bdecayCLYC: public TObject
+{
+ private:
+  
+ public:
+  double timecfd[17];
+  double timelow[17];
+  double timehigh[17];
+  double dtdc[17];
+  double itdc[17];
+  double eventtdc[17];
+  double energy[17];
+  double goodenergy[17];
+  double ecal[17];
+  double amp[17];
+  double ampcal[17];
+  double area[17];
+  double areacal[17];
+  
+
+  int mult;
+  double time[17];
+  double tdiff[17][17];
+
+  double dynode_tdiff[17];
+  double timecfd_filt[17];
+  double cfdtrigpt_filt[17];
+  
+  
+ public:
+  //bdecayCLYC() {};
+  //~bdecayCLYC() {};
+  void Reset();
+
+  ClassDef(bdecayCLYC,1);
+};
+
+/* Gamma Energy Totals */
+class bdecayCLYCTotal: public TObject
+{
+ private:
+  
+ public:
+  int mult;
+  int total;
+  int tot11;
+  int xmatrix;
+  int ymatrix;
+  int xmat11;
+  int ymat11;
+  
+ public:
+  //bdecayCLYCTotal() {};
+  //~bdecayCLYCTotal() {};
+  void Reset();
+  
+  ClassDef(bdecayCLYCTotal,1);
 };
 
 /* DDAS diagnostics */
@@ -567,9 +642,11 @@ class betadecay: public TObject
   bdecaySega sega;
   bdecaySegaTotal segatotal;
   bdecayLaBr3 labr3;
+  bdecayCLYC clyc;
   bdecayPSPMT pspmt;
   bdecayI2 i2;
   bdecayLaBr3Total labr3total;
+  bdecayCLYCTotal clyctotal;
   bdecayDdasDiagnostics ddasdiagnostics;
 
  public:
@@ -595,6 +672,7 @@ class rootdataout : public TObject
   bdecaySega sega;
   bdecaySegaTotal segatotal;
   bdecayLaBr3 labr3;
+  bdecayCLYC clyc;
   bdecayI2 i2;
   bdecayPSPMT pspmt;
   

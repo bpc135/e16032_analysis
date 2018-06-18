@@ -131,6 +131,7 @@ class bdecayvHitFlag
   int backloall;
   int sega;
   int labr3;
+  int clyc;
   int pspmt;
   int i2n;
   int i2s;
@@ -265,6 +266,27 @@ class bdecayvLaBr3
   void Initialize();
 };
 
+// CLYC
+class bdecayvCLYC
+{
+ public:
+  float square[17];
+  float slope[17];
+  float intercept[17];
+  float toffset[17];
+  float dynode_toffset[17];
+  float thresh[37];
+  float hithresh[37];
+  float lotime;
+  float hitime;
+  float clyc_toffset[17][17];
+
+ public:
+  bdecayvCLYC();
+  ~bdecayvCLYC();
+  void Initialize();
+};
+
 
 
 /* The entire beta decay setup */
@@ -286,6 +308,7 @@ class betadecayvariables
   bdecayvI2Calibrator i2n;
   bdecayvI2Calibrator i2s;
   bdecayvLaBr3 labr3;
+  bdecayvCLYC clyc;
 
  public:
   betadecayvariables();
@@ -295,6 +318,8 @@ class betadecayvariables
   void ReadSega(char *Name);
   void ReadOther(char *Name);
   void ReadLaBr3(char *Name);
+  void ReadCLYC(char *Name);
+  void ReadPSPMT(char *Name);
 
 };
 

@@ -97,6 +97,7 @@ void rootdataout::SetOutputValues(betadecay bdecay){
   sega = bdecay.sega;
   segatotal = bdecay.segatotal;
   labr3 = bdecay.labr3;
+  clyc = bdecay.clyc;
   pspmt = bdecay.pspmt;
   i2 = bdecay.i2;
   ddasdiagnostics = bdecay.ddasdiagnostics;
@@ -125,6 +126,7 @@ void betadecay::Reset()
   segatotal.Reset();
   ddasdiagnostics.Reset();
   labr3.Reset();
+  clyc.Reset();
   pspmt.Reset();
   i2.Reset();
   
@@ -145,6 +147,7 @@ void rootdataout::Reset()
   sega.Reset();
   ddasdiagnostics.Reset();
   labr3.Reset();
+  clyc.Reset();
   pspmt.Reset();
   i2.Reset();
 }
@@ -439,9 +442,9 @@ void bdecayLaBr3::Reset()
   //initialize the differences to -10000000 so we know when it wasn't set
   memset(tdiff, 100000, 17*17*sizeof(double));
   memset(amp,-1,17*sizeof(double));
-  memset(amp_scaled,-1,17*sizeof(double));
+  memset(ampcal,-1,17*sizeof(double));
   memset(area,0,17*sizeof(double));
-  memset(area_scaled,0,17*sizeof(double));
+  memset(areacal,0,17*sizeof(double));
   //initialize the differences to -10000000 so we know when it wasn't set
   memset(dynode_tdiff, 100000, 17*sizeof(double));
   //add in parameters that output the CFD filter time + trigger point
@@ -458,21 +461,87 @@ void bdecayLaBr3Total::Reset()
   xmatrix = -1;
   ymatrix = -1;
   xmat11 = -1;
+  ymat11 = -1;}
+
+
+void bdecayCLYC::Reset()
+{
+  mult = 0;
+
+  memset(timecfd,0,17*sizeof(double));
+  memset(timelow,0,17*sizeof(double));
+  memset(timehigh, 0,17*sizeof(double));
+  memset(dtdc, -1,17*sizeof(double));
+  memset(itdc, -1,17*sizeof(double));
+  memset(eventtdc,-1,17*sizeof(double));
+  memset(energy,-1,17*sizeof(double));
+  memset(ecal, -1,17*sizeof(double));
+  memset(time, 0, 17*sizeof(double));
+  //initialize the differences to -10000000 so we know when it wasn't set
+  memset(tdiff, 100000, 17*17*sizeof(double));
+  memset(amp,-1,17*sizeof(double));
+  memset(ampcal,-1,17*sizeof(double));
+  memset(area,0,17*sizeof(double));
+  memset(areacal,0,17*sizeof(double));
+  //initialize the differences to -10000000 so we know when it wasn't set
+  memset(dynode_tdiff, 100000, 17*sizeof(double));
+  //add in parameters that output the CFD filter time + trigger point
+  memset(timecfd_filt,0,17*sizeof(double));
+  memset(cfdtrigpt_filt,0,17*sizeof(double));
+  
+}
+
+void bdecayCLYCTotal::Reset()
+{
+  mult = 0;
+  total = -1;
+  tot11 = -1;
+  xmatrix = -1;
+  ymatrix = -1;
+  xmat11 = -1;
   ymat11 = -1;
 }
 
 void bdecayPSPMT::Reset()
 {
+
+  memset(aenergy,-1,258*sizeof(double));
+  memset(aecal,-1,258*sizeof(double));
+  memset(atime,0,258*sizeof(double));
+  memset(aoverflow,-1,258*sizeof(double));
+
+  memset(aamp,-1,258*sizeof(double));
+  memset(aampcal,-1,258*sizeof(double));
+  
+  memset(aarea,-1,258*sizeof(double));
+  memset(aareacal,-1,258*sizeof(double));
+  
+  memset(lowpoint,-1,258*sizeof(double));
+  memset(baseline,-1,258*sizeof(double));
+  memset(ratio,0,258*sizeof(double));
+  
+  memset(pixmult,0,258*sizeof(int));
+  
+  memset(loaenergy,-1,258*sizeof(double));
+  memset(loaecal,-1,258*sizeof(double));
+  memset(loaamp,-1,258*sizeof(double));
+  memset(loaampcal,-1,258*sizeof(double));
+  memset(loaarea,-1,258*sizeof(double));
+  memset(loaareacal,-1,258*sizeof(double));
+  
+  memset(loatime,0,258*sizeof(double));
+  memset(loatdiff,0,258*sizeof(double));
+
+  
   //dynode
   dyenergy = -1;
   dyecal = -1;
   dyamp = -1;
-  dyamp_scaled = -1;
   dyarea = -1;
-  dyarea_scaled = -1;
   dyoverflow = -1;
   dytime = 0;
   dytdiff = 0;
+  
   //double pulse
   dyE1=-1;
   dyT1=-1;
@@ -482,7 +551,10 @@ void bdecayPSPMT::Reset()
 
   //anode
   asum = -1;
+  asumcent = -1;
+  asumcent50 = -1;
   amax = 0;
+  amaxcent = 0;
   amult = 0;
   amaxx = 0;
   amaxy = 0;
@@ -491,14 +563,28 @@ void bdecayPSPMT::Reset()
   posyEcent = 0;
   posxEcent50 = 0;
   posyEcent50 = 0;
+  amaxcent = 0;
+  asumcent = -1;
+  asumcent50 = -1;
   posxampcent = -1;
+
   posyampcent = -1;
   posxampcent50 = -1;
   posyampcent50 = -1;
+  aampmaxcent = -1;
+  aampmaxcentcal = -1;
+  aampsumcent = -1;
+  aampsumcent50 = -1;
+  
   posxareacent = -1;
   posyareacent = -1;
   posxareacent50 = -1;
   posyareacent50 = -1;
+  aareamaxcent = -1;
+  aareamaxcentcal = -1;
+  aareasumcent = -1;
+  aareasumcent50 = -1;
+  
   loasum = -1;
   loamax = -1;
   loamaxtime = 0;
@@ -517,43 +603,30 @@ void bdecayPSPMT::Reset()
   loposyareacent = -1;
   loposxareacent50 = -1;
   loposyareacent50 = -1;
+  
   aampsum = -1;
+  aampsumcent = -1;
+  aampsumcent50 = -1;
   aampmax = -1;
+  aampmaxcent = -1;
+  aampmaxcentcal = -1;
   aampmaxx = -1;
   aampmaxy = -1;
   aampmaxtime = 0.0;
   aareasum = -1;
+  aareasumcent = -1;
+  aareasumcent50 = -1;
   aareamaxx = -1;
   aareamaxy = -1;
   aareamax = -1;
+  aareamaxcent = -1;
+  aareamaxcentcal = -1;
   aareamaxtime = 0.0;
   loaampsum = -1;
   loaareasum = -1;
   loaampmax = -1;
   loaareamax = -1;
-  
-  
-  memset(aenergy,-1,258*sizeof(double));
-  memset(aecal,-1,258*sizeof(double));
-  memset(atime,0,258*sizeof(double));
-  memset(aamp,-1,258*sizeof(double));
-  memset(aamp_scaled,-1,258*sizeof(double));
-  memset(aarea,-1,258*sizeof(double));
-  memset(aarea_scaled,-1,258*sizeof(double));
-  memset(lowpoint,-1,258*sizeof(double));
-  memset(baseline,-1,258*sizeof(double));
-  memset(ratio,0,258*sizeof(double));
-  memset(pixmult,0,258*sizeof(int));
-  memset(loaenergy,-1,258*sizeof(double));
-  memset(loaecal,-1,258*sizeof(double));
-  memset(loatime,0,258*sizeof(double));
-  memset(loatdiff,0,258*sizeof(double));
-  memset(loaamp,-1,258*sizeof(double));
-  memset(loaamp_scaled,-1,258*sizeof(double));
-  memset(loaarea,-1,258*sizeof(double));
-  memset(loaarea_scaled,-1,258*sizeof(double));
-  
-  
+ 
 }
 
 void bdecayI2::Reset()

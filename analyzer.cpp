@@ -27,7 +27,7 @@ void SetInitialPixie16Utilities(Pixie16Utilities *myUtils/*, vector<UShort_t> tr
   Int_t energy_range;           //Sets the Energy Filter Range
 
   if(adcfreq == 500 && dynodeflag == 1){
-    trace_delay = 250;          
+    trace_delay = 500;          
     trigfilt_gap = 0;           
     trigfilt_range = 0;         
     trigfilt_length = 100;      
@@ -38,7 +38,7 @@ void SetInitialPixie16Utilities(Pixie16Utilities *myUtils/*, vector<UShort_t> tr
     cfd_scalefact = 0;          
     tau_val = 20;               
   
-    energy_length = 200;        
+    energy_length = 400;        
     energy_gap = 60;            
     energy_range = 1;           
   }else if(adcfreq == 500){ //anode 500
@@ -238,7 +238,7 @@ void analyze_event(int crateid, int slotid, int channum, vector<UShort_t> trace,
   }
 
   //calculate trace analysis parameters
-  double max, min, amplitude, area, baseline, amplitude_scaled, area_scaled, overflow = 0.0;
+  double max, min, amplitude, area, baseline, amplitudecal, areacal, overflow = 0.0;
   max = min = amplitude = baseline = 0;
   double maxE = 0;
   int maxPix = 0;
@@ -253,14 +253,14 @@ void analyze_event(int crateid, int slotid, int channum, vector<UShort_t> trace,
     utils->CalculateTraceAmplitude(trace);
     amplitude = utils->GetTraceAmplitude();
     //modify amplitude for differences in bit depth
-    amplitude_scaled = amplitude * scale_fact[modnum];
+    amplitudecal = amplitude * scale_fact[modnum] + random3->Rndm();
     //get trace areas
     loarea = int (utils->GetTraceDelay() / (int(1000./ModMSPS)));
     offset = int (40. / (int(1000./ModMSPS)));
     hiarea = loarea + offset;
     utils->CalculateTraceArea_PR(trace,loarea,hiarea);
     area = utils->GetTraceArea();
-    area_scaled = area * scale_fact[modnum];
+    areacal = area * scale_fact[modnum];
 
     utils->CheckOverflowUnderflow(trace,5,16000);  //cheating, 16 modules are running with low amplitude sinals so all should be fairly small
     overflow = utils->GetOverflow();
@@ -276,13 +276,14 @@ void analyze_event(int crateid, int slotid, int channum, vector<UShort_t> trace,
 
     //set initial dynode parameters
     bdecay->pspmt.dyenergy = bdecay->adc[adcnumber].channel[channum]; //Pixie energy
-    bdecay->pspmt.dyecal = bdecay->adc[adcnumber].channel[channum];
+
+    //  cout<<endl<<"Dynode: "<<bdecay->pspmt.dyenergy<<endl<<endl;
+    
+    bdecay->pspmt.dyecal = bdecay->adc[adcnumber].channel[channum] + random3->Rndm();
     bdecay->pspmt.dytime = bdecay->time[adcnumber].timefull[channum]; //time
     bdecay->pspmt.dyoverflow = overflow; //overflow
     bdecay->pspmt.dyamp = amplitude;
-    bdecay->pspmt.dyamp_scaled = amplitude_scaled;
     bdecay->pspmt.dyarea = area;
-    bdecay->pspmt.dyarea_scaled = area_scaled;
 
 
     //Double pulse stuff
@@ -489,9 +490,44 @@ void analyze_event(int crateid, int slotid, int channum, vector<UShort_t> trace,
 
     //trace analysis
     bdecay->labr3.amp[detnum] = amplitude;
-    bdecay->labr3.amp_scaled[detnum] = amplitude_scaled;
+    bdecay->labr3.ampcal[detnum] = amplitudecal;
     bdecay->labr3.area[detnum] = area;
-    bdecay->labr3.area_scaled[detnum] = area_scaled;
+    bdecay->labr3.areacal[detnum] = areacal;
+    
+  }
+
+  //Clyc
+  if(id >= 16 && id<29) {
+    int detnum = id;
+    
+    //Register energy
+    bdecay->clyc.energy[detnum] = (bdecay->adc[adcnumber].channel[channum]) + (random3->Rndm());    
+    
+      
+    //bdecay->clyc.ecal[detnum] = (bdecayv->clyc.square[detnum]*pow(bdecayv->clyc.square[detnum],2) + (bdecayv->clyc.slope[detnum] * bdecay->clyc.energy[detnum]) + bdecayv->clyc.intercept[detnum]);
+      
+    bdecayv->hit.clyc = 1;
+
+    //Times
+    //bdecay->clyc.timecfd[detnum] = bdecay->tdc[adcnumber].time[channum];
+    bdecay->clyc.timecfd[detnum] = bdecay->time[adcnumber].timecfd[channum];
+    bdecay->clyc.timelow[detnum] = bdecay->time[adcnumber].timelow[channum];
+    bdecay->clyc.timehigh[detnum]= bdecay->time[adcnumber].timehigh[channum];
+    bdecay->clyc.time[detnum] = bdecay->time[adcnumber].timefull[channum];
+    
+    //Current time and TDC
+    currenttime = bdecay->time[adcnumber].timefull[channum];
+
+    // currenttime = bdecay->time[adcnumber].timelow[channum] + bdecay->time[adcnumber].timehigh[channum] * 4294967296.;
+    bdecay->clyc.eventtdc[detnum] = (currenttime - starttime) + 3000.;
+    bdecay->clyc.ecal[detnum] = (bdecayv->clyc.square[detnum]*bdecay->clyc.energy[detnum]*bdecay->clyc.energy[detnum]) + (bdecayv->clyc.slope[detnum]*bdecay->clyc.energy[detnum]) + bdecayv->clyc.intercept[detnum];
+    bdecay->clyc.mult++;
+
+    //trace analysis
+    bdecay->clyc.amp[detnum] = amplitude;
+    bdecay->clyc.ampcal[detnum] = amplitudecal;
+    bdecay->clyc.area[detnum] = area;
+    bdecay->clyc.areacal[detnum] = areacal;
     
   }
 
@@ -673,21 +709,12 @@ void analyze_event(int crateid, int slotid, int channum, vector<UShort_t> trace,
 
 
   //PSPMT anode : ID 64 - 319
-  int cebr3E[16][16]; //temporary array to help me organize the data like I did in an initial code
   if( (id >= 64) && (id < 320) ){
     int pix = 0;
     int rownum = modnum - 4;
     int xpix = channum;
     int ypix = 15 - rownum;
-    //pix = (channum * 16) + (15 - rownum);
-    pix = (ypix * 16) + xpix + 1;
-    //if(id >= 64 && id < 80){
-    // if (pix == 1){
-    //   cout << "id = " << id << ", xpix = " << xpix << ", ypix = " << ypix << ", pix = " << pix << endl;
-    // }
-    //cebr3E[channum][15-rownum] = bdecay->adc[adcnumber].channel[channum];
-    cebr3E[xpix][ypix] = bdecay->adc[adcnumber].channel[channum];
-    
+    pix = (ypix * 16) + xpix + 1;    
     
     if(pix>256) {
       cout<<"Pixel > 256   Problem with Pixel Number in PSPMT unpacker"<<endl;
@@ -717,16 +744,20 @@ void analyze_event(int crateid, int slotid, int channum, vector<UShort_t> trace,
     }
     
     bdecay->pspmt.aamp[pix] = amplitude;
-    bdecay->pspmt.aamp_scaled[pix] = amplitude_scaled;
+    bdecay->pspmt.aampcal[pix] = amplitudecal;
     bdecay->pspmt.aarea[pix] = area;
-    bdecay->pspmt.aarea_scaled[pix] = area_scaled;
+    bdecay->pspmt.aareacal[pix] = areacal;
+    bdecay->pspmt.aoverflow[pix] = overflow; //overflow
     bdecay->pspmt.lowpoint[pix] = min; //not scaled
     bdecay->pspmt.baseline[pix] = baseline;
     bdecay->pspmt.ratio[pix] = (baseline-min)/max;
     bdecay->pspmt.amult += 1;
         
     bdecay->pspmt.aenergy[pix] = bdecay->adc[adcnumber].channel[channum];
-    bdecay->pspmt.aecal[pix] = (bdecay->pspmt.aenergy[pix]);
+
+    // cout<<"pix: "<<pix<<" pspmt.aenergy: "<<bdecay->pspmt.aenergy[pix];
+    
+    bdecay->pspmt.aecal[pix] = bdecay->pspmt.aenergy[pix];
     bdecay->pspmt.atime[pix] = bdecay->time[adcnumber].timefull[channum];
     bdecay->pspmt.asum += bdecay->pspmt.aecal[pix];
     bdecay->pspmt.pixmult[pix] = bdecay->pspmt.pixmult[pix] + 1;
@@ -739,18 +770,25 @@ void analyze_event(int crateid, int slotid, int channum, vector<UShort_t> trace,
       bdecay->pspmt.amaxy = ypix;
       bdecay->pspmt.amaxtime = bdecay->time[adcnumber].timefull[channum];
     }
-    if(bdecay->pspmt.aamp_scaled[pix] > bdecay->pspmt.aampmax){
-      bdecay->pspmt.aampmax = bdecay->pspmt.aamp_scaled[pix];
+    if(bdecay->pspmt.aampcal[pix] > bdecay->pspmt.aampmax){
+      bdecay->pspmt.aampmax = bdecay->pspmt.aampcal[pix];
       bdecay->pspmt.aampmaxx = xpix;
       bdecay->pspmt.aampmaxy = ypix;
       bdecay->pspmt.aampmaxtime = bdecay->time[adcnumber].timefull[channum];
     }
-    if(bdecay->pspmt.aarea_scaled[pix] > bdecay->pspmt.aareamax){
-      bdecay->pspmt.aareamax = bdecay->pspmt.aarea_scaled[pix];
+    if(bdecay->pspmt.aareacal[pix] > bdecay->pspmt.aareamax){
+      bdecay->pspmt.aareamax = bdecay->pspmt.aareacal[pix];
       bdecay->pspmt.aareamaxx = xpix;
       bdecay->pspmt.aareamaxy = ypix;
       bdecay->pspmt.aareamaxtime = bdecay->time[adcnumber].timefull[channum];
     }
+
+    // int anode_threshold = 30000; //for pixieE
+    // if(bdecay->pspmt.aecal[i] > 0 && bdecay->pspmt.aecal[i] < anode_threshold){
+    //   if(bdecay->pspmt.aecal[i] > bdecay->pspmt.amaxcent){
+    // 	bdecay->pspmt.amaxcent = bdecay->pspmt.aecal[i];
+    //   }
+    // }
     
     // } // end requirement of the first trigger from this channel in the event
   }      

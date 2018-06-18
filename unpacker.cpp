@@ -18,6 +18,8 @@ char calDefaultPath[] = "/user/e16032/RootAnalysis_Scripted/cal";
 string SegaDefault;
 char OtherDefault[] = "OtherInit.txt";
 string LaBr3Default;
+string CLYCDefaut;
+string PSPMTDefault;
 //char LaBr3Default[] = "LaBr3Init.txt";
 
 double starttime;
@@ -72,6 +74,8 @@ int unpack_data(TTree *tree_in, TTree *tree_out, string Run_Number ) {
   char SegaInitName[100];
   char OtherInitName[100];
   char LaBr3InitName[100];
+  char CLYCInitName[100];
+  char PSPMTInitName[100];
   
   string tempsega;
   tempsega = "SeGAInit_"+Run_Number.substr(0,4)+".txt";
@@ -80,16 +84,23 @@ int unpack_data(TTree *tree_in, TTree *tree_out, string Run_Number ) {
   string templabr3;
   templabr3 = "LaBr3Init_"+Run_Number.substr(0,4)+".txt";
   LaBr3Default = templabr3;
+
+  string temppspmt;
+  temppspmt = "PSPMTInit_"+Run_Number.substr(0,4)+".txt";
+  PSPMTDefault = temppspmt;
     
   cout<<SegaDefault<<endl;
   cout<<LaBr3Default<<endl;
+  cout<<PSPMTDefault<<endl;
   sprintf(SegaInitName, "%s/%s", calDefaultPath, SegaDefault.c_str());
   sprintf(OtherInitName, "%s/%s", calDefaultPath, OtherDefault);
   sprintf(LaBr3InitName, "%s/%s", calDefaultPath, LaBr3Default.c_str());
+  sprintf(PSPMTInitName, "%s/%s", calDefaultPath, PSPMTDefault.c_str());
   
   bdecayv.ReadSega(SegaInitName);
   bdecayv.ReadOther(OtherInitName);
   bdecayv.ReadLaBr3(LaBr3InitName);
+  bdecayv.ReadPSPMT(PSPMTInitName);
 
   //Report the correlation time
   cout << "Correlation time " << bdecayv.clock.max << endl;
@@ -182,6 +193,7 @@ int unpack_event(int eventnum, betadecay *bdecay, betadecayvariables *bdecayv,ve
 
   bdecay->Reset();
   bdecayv->hit.Initialize();
+  //cout<<endl<<endl;
   
   //
   int eventsize = channellist.size();
@@ -194,7 +206,6 @@ int unpack_event(int eventnum, betadecay *bdecay, betadecayvariables *bdecayv,ve
   for (int j=1; j<=20; j++) {
     bdecay->ddasdiagnostics.adchit[j] = 0;
   }
-
 
   //In e14057, ringing in the dynode upon implants was identified as a problem
   //leaving this code here but commenting it out in case we need it for e16032
@@ -304,14 +315,17 @@ int unpack_event(int eventnum, betadecay *bdecay, betadecayvariables *bdecayv,ve
   //Determine Decay Multiplicity
   int multdecay = 0;
   
-  for(int i=1; i<258; i++){
-    if(bdecay->pspmt.aamp[i] > 0 ) {
+  for(int eye=1; eye<258; eye++){
+    if(bdecay->pspmt.aamp[eye] > 0 ) {
       multdecay++;
     }
   }
+
+  //time difference between dynode and max anode
+  bdecay->pspmt.dytdiff = bdecay->pspmt.dytime - bdecay->pspmt.amaxtime;
     
   //Determine x and y positions for pspmt
-  double asumcent, asumcent50, aampsumcent, aampsumcent50, aareasumcent, aareasumcent50, amaxcent, aampmaxcent, aampmaxcent_scaled, aareacent, aareamaxcent,aareamaxcent_scaled = 0.0;
+  double asumcent, asumcent50, aampsumcent, aampsumcent50, aareasumcent, aareasumcent50, amaxcent, aampmaxcent, aampmaxcentcal, aareacent, aareamaxcent,aareamaxcentcal = 0.0;
 
   //first determine maxima within the intended thresholds for the centroid determinations
   for(int i=1; i<257; i++){
@@ -319,46 +333,57 @@ int unpack_event(int eventnum, betadecay *bdecay, betadecayvariables *bdecayv,ve
     //pixie energies
     if(bdecay->pspmt.aecal[i] > 0 && bdecay->pspmt.aecal[i] < 30000){
 
-      bdecay->pspmt.amult++;
       bdecayv->hit.pspmt = 1;
       if(bdecay->pspmt.aecal[i] > amaxcent){
 	amaxcent = bdecay->pspmt.aecal[i];
       }
 
     }
-
+    
     //amplitudes
     if(bdecay->pspmt.aamp[i] > 0) {
 
-      if(bdecay->pspmt.aamp_scaled[i] > aampmaxcent_scaled){
-	aampmaxcent_scaled = bdecay->pspmt.aamp_scaled[i];
+      if(bdecay->pspmt.aampcal[i] > aampmaxcentcal){
+	aampmaxcentcal = bdecay->pspmt.aampcal[i];
       }
       if(bdecay->pspmt.aamp[i] > amaxcent){
-	amaxcent = bdecay->pspmt.aamp[i];
+	aampmaxcent = bdecay->pspmt.aamp[i];
       }
       
     }
     
     //areas
     if(bdecay->pspmt.aarea[i] > 0){
-      if(bdecay->pspmt.aarea_scaled[i] > aareamaxcent_scaled){
-	aareamaxcent_scaled = bdecay->pspmt.aarea_scaled[i];
+      if(bdecay->pspmt.aareacal[i] > aareamaxcentcal){
+	aareamaxcentcal = bdecay->pspmt.aareacal[i];
       }
       if(bdecay->pspmt.aarea[i] > amaxcent){
-	amaxcent = bdecay->pspmt.aarea[i];
+	aareamaxcent = bdecay->pspmt.aarea[i];
       }
 
     }
 
   }
 
+  // if(bdecay->pspmt.dyenergy>0) {
+  //   cout<<"amaxcent: "<<amaxcent<<" Dynode: "<<bdecay->pspmt.dyenergy<<endl;
+  // }
+
+  bdecay->pspmt.amaxcent = amaxcent;
+  bdecay->pspmt.aampmaxcent = aampmaxcent;
+  bdecay->pspmt.aampmaxcentcal = aareamaxcentcal;
+  bdecay->pspmt.aareamaxcent = aareamaxcent;
+  bdecay->pspmt.aareamaxcentcal = aareamaxcentcal;
+
+ 
+  
   for(int i = 1; i < 257; i++){
 
     int xpix = (int)((i-1) % 16);
     int ypix = (int)((i-1) / 16);
 
     if(bdecay->pspmt.aecal[i] > 0 && bdecay->pspmt.aecal[i] < 30000){
-
+     
       //pixieEcent
       bdecay->pspmt.posxEcent += xpix * bdecay->pspmt.aecal[i];
       bdecay->pspmt.posyEcent += ypix * bdecay->pspmt.aecal[i];
@@ -372,66 +397,39 @@ int unpack_event(int eventnum, betadecay *bdecay, betadecayvariables *bdecayv,ve
       }
 
       //pixie amplitudes cent
-      bdecay->pspmt.posxampcent += xpix * bdecay->pspmt.aamp_scaled[i];
-      bdecay->pspmt.posyampcent += ypix * bdecay->pspmt.aamp_scaled[i];
-      aampsumcent += bdecay->pspmt.aamp_scaled[i];
+      bdecay->pspmt.posxampcent += xpix * bdecay->pspmt.aampcal[i];
+      bdecay->pspmt.posyampcent += ypix * bdecay->pspmt.aampcal[i];
+      aampsumcent += bdecay->pspmt.aampcal[i];
 
       //calculate the centroids using 50% of maximum anode values
-      if(bdecay->pspmt.aamp_scaled[i] > (0.5 * bdecay->pspmt.aampmax)){
+      if(bdecay->pspmt.aampcal[i] > (0.5 * bdecay->pspmt.aampmax)){
 	
-	bdecay->pspmt.posxampcent50 += xpix * bdecay->pspmt.aamp_scaled[i];
-	bdecay->pspmt.posyampcent50 += ypix * bdecay->pspmt.aamp_scaled[i];
-	aampsumcent50 += bdecay->pspmt.aamp_scaled[i];
+	bdecay->pspmt.posxampcent50 += xpix * bdecay->pspmt.aampcal[i];
+	bdecay->pspmt.posyampcent50 += ypix * bdecay->pspmt.aampcal[i];
+	aampsumcent50 += bdecay->pspmt.aampcal[i];
       }
 
       //pixie areas cent
-      bdecay->pspmt.posxareacent += xpix * bdecay->pspmt.aarea_scaled[i];
-      bdecay->pspmt.posyareacent += ypix * bdecay->pspmt.aarea_scaled[i];
-      aareasumcent += bdecay->pspmt.aarea_scaled[i];
+      bdecay->pspmt.posxareacent += xpix * bdecay->pspmt.aareacal[i];
+      bdecay->pspmt.posyareacent += ypix * bdecay->pspmt.aareacal[i];
+      aareasumcent += bdecay->pspmt.aareacal[i];
       
       //calculate the centroids using 50% of maximum anode values
-      if(bdecay->pspmt.aarea_scaled[i] > (0.5 * bdecay->pspmt.aareamax)){
-	bdecay->pspmt.posxareacent50 += xpix * bdecay->pspmt.aarea_scaled[i];
-	bdecay->pspmt.posyareacent50 += ypix * bdecay->pspmt.aarea_scaled[i];
-	aareasumcent50 += bdecay->pspmt.aarea_scaled[i];
+      if(bdecay->pspmt.aareacal[i] > (0.5 * bdecay->pspmt.aareamax)){
+	bdecay->pspmt.posxareacent50 += xpix * bdecay->pspmt.aareacal[i];
+	bdecay->pspmt.posyareacent50 += ypix * bdecay->pspmt.aareacal[i];
+	aareasumcent50 += bdecay->pspmt.aareacal[i];
       }
     }
   }
 
-  //checking energies of anodes
-  if(eventnum == 1763){
-    cout << "event = " << eventnum << endl;
-    cout << asumcent << endl;
-    cout << "posxEcent = " << bdecay->pspmt.posxEcent << endl;
+  bdecay->pspmt.asumcent = asumcent;
+  bdecay->pspmt.asumcent50 = asumcent50;
+  bdecay->pspmt.aampsumcent = aampsumcent;
+  bdecay->pspmt.aampsumcent50 = aampsumcent50;
+  bdecay->pspmt.aareasumcent = aareasumcent;
+  bdecay->pspmt.aareasumcent50 = aareasumcent50;
 
-    int cebr3E[16][16];
-    for(int ii = 0; ii < 16; ii++){
-      for(int jj = 0; jj < 16; jj++){
-	cebr3E[ii][jj] = 0;
-      }
-    }
-    int xpix1,ypix1;
-    for(int i = 1; i < 258; i++){
-      if(bdecay->pspmt.aecal[i] > 0 && bdecay->pspmt.aecal[i] < 30000){
-	
-  	xpix1 = (int)((i-1) % 16);
-	ypix1 = (int)((i-1) / 16);
-  	//cout << "aenergy[" << xpix1 <<"][" << ypix1 << "] = " << bdecay->pspmt.aenergy[i] << endl;
-	
-	cebr3E[xpix1][ypix1] = bdecay->pspmt.aenergy[i];
-      }
-    }
-    // for(int ii = 0; ii < 16; ii++){
-    //   for(int jj = 0; jj < 16; jj++){
-    // 	// if(cebr3E[ii][jj] > 0){
-    // 	//   cout << "aenergy[" << ii <<"][" << jj << "] = " << cebr3E[ii][jj] << endl;
-	  
-    // 	// }
-    //   }
-    // }
-    cout << bdecay->pspmt.posxEcent50 << " " << bdecay->pspmt.posyEcent50 << endl;
-    
-  }
 
   // if(bdecay->pspmt.posxEcent50 < 0.1 && bdecay->pspmt.posyEcent50){
   //   cout << "asum50 = " << asum50 << ", amax = " <<  bdecay->pspmt.amax << ", amaxx = " << bdecay->pspmt.amaxx << ", amaxy = " << bdecay->pspmt.amaxy << endl;
@@ -451,10 +449,7 @@ int unpack_event(int eventnum, betadecay *bdecay, betadecayvariables *bdecayv,ve
   bdecay->pspmt.posxareacent50 = bdecay->pspmt.posxareacent50 / aareasumcent50;
   bdecay->pspmt.posyareacent50 = bdecay->pspmt.posyareacent50 / aareasumcent50;
 
-  if(eventnum == 1763){
-    cout << "final posxEcent = " << bdecay->pspmt.posxEcent << endl;
-    cout << "posxEcent50 = " << bdecay->pspmt.posxEcent50 << endl;
-  }
+  //cout<<bdecay->pspmt.posxEcent<<"  "<<bdecay->pspmt.posyEcent<<endl;
   
   //Only fill this stuff for the low ("lo") gain things
   if ((bdecayv->hit.pin01 == 1) && bdecay->pspmt.dyamp > 0) {
@@ -496,16 +491,16 @@ int unpack_event(int eventnum, betadecay *bdecay, betadecayvariables *bdecayv,ve
       if(bdecay->pspmt.aamp[i] > 0){
 	
 	bdecay->pspmt.loaamp[i] = bdecay->pspmt.aamp[i];
-	bdecay->pspmt.loaamp_scaled[i] = bdecay->pspmt.aamp_scaled[i];
-	bdecay->pspmt.loposxampcent += xpix * bdecay->pspmt.loaamp_scaled[i];
-	bdecay->pspmt.loposyampcent += ypix * bdecay->pspmt.loaamp_scaled[i];
-	bdecay->pspmt.loasum += bdecay->pspmt.loaamp_scaled[i];
+	bdecay->pspmt.loaampcal[i] = bdecay->pspmt.aampcal[i];
+	bdecay->pspmt.loposxampcent += xpix * bdecay->pspmt.loaampcal[i];
+	bdecay->pspmt.loposyampcent += ypix * bdecay->pspmt.loaampcal[i];
+	bdecay->pspmt.loasum += bdecay->pspmt.loaampcal[i];
 
 	//calculate the centroids using 50% of maximum anode values
-	if(bdecay->pspmt.loaamp_scaled[i] > (0.5 * bdecay->pspmt.loamax)){
-	  bdecay->pspmt.loposxampcent50 += xpix * bdecay->pspmt.loaamp_scaled[i];
-	  bdecay->pspmt.loposyampcent50 += ypix * bdecay->pspmt.loaamp_scaled[i];
-	  loaampsum50 += bdecay->pspmt.loaamp_scaled[i];
+	if(bdecay->pspmt.loaampcal[i] > (0.5 * bdecay->pspmt.loamax)){
+	  bdecay->pspmt.loposxampcent50 += xpix * bdecay->pspmt.loaampcal[i];
+	  bdecay->pspmt.loposyampcent50 += ypix * bdecay->pspmt.loaampcal[i];
+	  loaampsum50 += bdecay->pspmt.loaampcal[i];
 	}
 	
       }
@@ -513,16 +508,16 @@ int unpack_event(int eventnum, betadecay *bdecay, betadecayvariables *bdecayv,ve
       if(bdecay->pspmt.aarea[i] > 0){
 	
 	bdecay->pspmt.loaarea[i] = bdecay->pspmt.aarea[i];
-	bdecay->pspmt.loaarea_scaled[i] = bdecay->pspmt.aarea_scaled[i];
-	bdecay->pspmt.loposxareacent += xpix * bdecay->pspmt.loaarea_scaled[i];
-	bdecay->pspmt.loposyareacent += ypix * bdecay->pspmt.loaarea_scaled[i];
-	bdecay->pspmt.loasum += bdecay->pspmt.loaarea_scaled[i];
+	bdecay->pspmt.loaareacal[i] = bdecay->pspmt.aareacal[i];
+	bdecay->pspmt.loposxareacent += xpix * bdecay->pspmt.loaareacal[i];
+	bdecay->pspmt.loposyareacent += ypix * bdecay->pspmt.loaareacal[i];
+	bdecay->pspmt.loasum += bdecay->pspmt.loaareacal[i];
 	
 	//calculate the centroids using 50% of maximum anode values
-	if(bdecay->pspmt.loaarea_scaled[i] > (0.5 * bdecay->pspmt.loamax)){
-	  bdecay->pspmt.loposxareacent50 += xpix * bdecay->pspmt.loaarea_scaled[i];
-	  bdecay->pspmt.loposyareacent50 += ypix * bdecay->pspmt.loaarea_scaled[i];
-	  loaareasum50 += bdecay->pspmt.loaarea_scaled[i];
+	if(bdecay->pspmt.loaareacal[i] > (0.5 * bdecay->pspmt.loamax)){
+	  bdecay->pspmt.loposxareacent50 += xpix * bdecay->pspmt.loaareacal[i];
+	  bdecay->pspmt.loposyareacent50 += ypix * bdecay->pspmt.loaareacal[i];
+	  loaareasum50 += bdecay->pspmt.loaareacal[i];
 	}
       }
     }

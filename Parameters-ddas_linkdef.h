@@ -17,7 +17,9 @@
 #pragma link C++ class bdecaySega+;
 #pragma link C++ class bdecaySegaTotal+;
 #pragma link C++ class bdecayLaBr3+;
+#pragma link C++ class bdecayCLYC;
 #pragma link C++ class bdecayLaBr3Total+;
+#pragma link C++ class bdecayCLYCTotal+;
 #pragma link C++ class bdecayDdasDiagnostics+;
 #pragma link C++ class betadecay+;
 #pragma link C++ class rootdataout+;

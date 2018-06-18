@@ -136,6 +136,7 @@ void bdecayvHitFlag::Initialize()
   backloall=0;
   sega    = 0;
   labr3   = 0;
+  clyc    = 0;
   i2n     = 0;
   i2s     = 0;
 }  
@@ -158,7 +159,7 @@ bdecayvPSPMTCalibrator::~bdecayvPSPMTCalibrator(){
 }
 void bdecayvPSPMTCalibrator::Initialize()
 {
-  for(int i = 0; i < 66; i++){
+  for(int i = 0; i < 258; i++){
     offset[i] = 0.;
     slope[i] = 1.;
     thresh[i] = 0.;
@@ -198,6 +199,31 @@ void bdecayvLaBr3::Initialize(){
     dynode_toffset[i] = 0.;
     for(int j = 0; j < 17; j++){
       labr_toffset[i][j] = 0.;
+    }
+  }
+  lotime = 0.;
+  hitime = 8192.;
+  
+  
+  
+}
+
+//CLYC
+bdecayvCLYC::bdecayvCLYC(){
+}
+bdecayvCLYC::~bdecayvCLYC(){
+}
+void bdecayvCLYC::Initialize(){
+  for(int i = 0; i < 18; i++){
+    square[i] = 0;
+    slope[i] = 1.;
+    intercept[i] = 0.;
+    toffset[i] = 0.;
+    thresh[i]    = 0.;
+    hithresh[i]  = 65536.;
+    dynode_toffset[i] = 0.;
+    for(int j = 0; j < 17; j++){
+      clyc_toffset[i][j] = 0.;
     }
   }
   lotime = 0.;
@@ -279,6 +305,120 @@ void betadecayvariables::Initialize(){
   sega.Initialize();
   i2n.Initialize();
   i2s.Initialize();
+
+}
+
+void betadecayvariables::ReadCLYC(char *Name){
+
+  cout<<"Reading clyc"<<endl;
+  cout<<Name<<endl;
+
+  ifstream calfile(Name);
+  int linenum = 0;
+
+  int location = -1;
+  double value = 0;
+ 
+  if(!calfile){
+    cout << "Unable to open file " << Name << endl;
+  }
+  else{
+    //read in cal file until end of file
+    while(calfile){
+      if(calfile && (isdigit(calfile.peek()))){
+	linenum++;
+
+	if(linenum < 257) {
+	  
+	  calfile >> location >> value;
+	  
+	  if(linenum < 17) clyc.square[location] = value;
+	  else if(linenum < 33) { 
+	    clyc.slope[location] = value;
+	    cout<<clyc.slope[location]<<endl;
+	  }
+	  else if(linenum < 49) clyc.intercept[location] = value;
+	  else if(linenum < 65) clyc.thresh[location] = value;
+	  else if(linenum < 81) clyc.hithresh[location] = value;
+	  else if(linenum < 97) {
+	    clyc.dynode_toffset[location] = value;
+	    cout<<clyc.dynode_toffset[location]<<endl;
+	  }
+	  else if(linenum < 113){
+	    clyc.clyc_toffset[1][location] = value;
+	    cout<<clyc.clyc_toffset[1][location]<<endl;
+	  }
+	  else if(linenum < 129){
+	    clyc.clyc_toffset[2][location] = value;
+	    cout<<clyc.clyc_toffset[2][location]<<endl;
+	  }
+	  else if(linenum < 145){
+	    clyc.clyc_toffset[3][location] = value;
+	    cout<<clyc.clyc_toffset[3][location]<<endl;
+	  }
+	  else if(linenum < 161){
+	    clyc.clyc_toffset[4][location] = value;
+	    cout<<clyc.clyc_toffset[4][location]<<endl;
+	  }
+	  else if(linenum < 177){
+	    clyc.clyc_toffset[5][location] = value;
+	    cout<<clyc.clyc_toffset[5][location]<<endl;
+	  }
+	  else if(linenum < 193){
+	    clyc.clyc_toffset[6][location] = value;
+	    cout<<clyc.clyc_toffset[6][location]<<endl;
+	  }
+	  else if(linenum < 209){
+	    clyc.clyc_toffset[7][location] = value;
+	    cout<<clyc.clyc_toffset[7][location]<<endl;
+	  }
+	  else if(linenum < 225){
+	    clyc.clyc_toffset[8][location] = value;
+	    cout<<clyc.clyc_toffset[8][location]<<endl;
+	  }
+	  else if(linenum < 241){
+	    clyc.clyc_toffset[9][location] = value;
+	    cout<<clyc.clyc_toffset[9][location]<<endl;
+	  }
+	  else if(linenum < 257){
+	    clyc.clyc_toffset[10][location] = value;
+	    cout<<clyc.clyc_toffset[10][location]<<endl;
+	  }
+	}
+	if(linenum == 257){
+	  calfile >> value;
+	  clyc.lotime = value;
+	}
+	if(linenum == 258){
+	  calfile >> value;
+	  clyc.hitime = value;
+	}
+
+      } // line read
+      else{
+	//ignore line
+	calfile.ignore(1000,'\n');
+      }
+    } // end while read
+
+  }
+
+  //set the offsets to the values for initial analysis
+  // clyc.toffset[1] = 0;
+  // clyc.toffset[2] = 80.5;
+  // clyc.toffset[3] = 81.75;
+  // clyc.toffset[4] = 75.5;
+  // clyc.toffset[5] = 76.25;
+  // clyc.toffset[6] = 82.75;
+  // clyc.toffset[7] = 72;
+  // clyc.toffset[8] = 75;
+  // clyc.toffset[9] = -1.5;
+  // clyc.toffset[10] = 80;
+
+  for(int q=0; q<17; q++) {
+    cout<<clyc.square[q]<<"  "<<clyc.slope[q]<<"  "<<clyc.intercept[q]<<endl;
+  }
+  calfile.close();
 
 }
 
@@ -447,6 +587,60 @@ void betadecayvariables::ReadSega(char *Name){
 
   }
   calfile.close();
+
+}
+
+void betadecayvariables::ReadPSPMT(char *Name){
+
+  // cout<<"Reading PSPMT"<<endl;
+  // cout<<Name<<endl;
+
+  // ifstream calfile(Name);
+  // int linenum = 0;
+
+  // int location = -1;
+  // double value = 0;
+ 
+  // if(!calfile){
+  //   cout << "Unable to open file " << Name << endl;
+  // }
+  // else{
+  //   //read in cal file until end of file
+  //   while(calfile){
+  //     if(calfile && (isdigit(calfile.peek()))){
+  // 	linenum++;
+
+  // 	if(linenum < 81) {
+	  
+  // 	  calfile >> location >> value;
+	  
+  // 	  if(linenum < 17) pspmt.square[location] = value;
+  // 	  else if(linenum < 33) { 
+  // 	    pspmt.slope[location] = value;
+  // 	    cout<<pspmt.slope[location]<<endl;
+  // 	  }
+  // 	  else if(linenum < 49) pspmt.intercept[location] = value;
+  // 	  else if(linenum < 65) pspmt.thresh[location] = value;
+  // 	  else if(linenum < 81) pspmt.hithresh[location] = value;
+  // 	}
+  // 	if(linenum == 81){
+  // 	  calfile >> value;
+  // 	  pspmt.lotime = value;
+  // 	}
+  // 	if(linenum == 82){
+  // 	  calfile >> value;
+  // 	  pspmt.hitime = value;
+  // 	}
+
+  //     } // line read
+  //     else{
+  // 	//ignore line
+  // 	calfile.ignore(1000,'\n');
+  //     }
+  //   } // end while read
+
+  // }
+  // calfile.close();
 
 }
 
