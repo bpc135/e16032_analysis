@@ -30,7 +30,7 @@ double endtime;
 
 
 
-void reset_channel_list(vector<ddaschannel*> channellist,  vector<ddaschannel*>::iterator channellist_it) {
+void reset_channel_list(vector<DDASRootFitHit*> channellist,  vector<DDASRootFitHit*>::iterator channellist_it) {
   //cout << "Reset channel list.  Size = " << channellist.size() << endl;
   
   int listsize = channellist.size();
@@ -50,8 +50,11 @@ void reset_channel_list(vector<ddaschannel*> channellist,  vector<ddaschannel*>:
 int unpack_data(TTree *tree_in, TTree *tree_out, string Run_Number ) {
 
   //Channelist of the Event Vector
-  vector<ddaschannel*>  channellist;
-  vector<ddaschannel*>::iterator channellist_it;
+  //vector<ddaschannel*>  channellist;
+  //vector<ddaschannel*>::iterator channellist_it;
+
+  vector<DDASRootFitHit*> channellist;
+  vector<DDASRootFitHit*>::iterator channellist_it;
 
   //Variables and Results
   betadecay bdecay;
@@ -121,7 +124,10 @@ int unpack_data(TTree *tree_in, TTree *tree_out, string Run_Number ) {
   int oneper = (int)(nevents * 0.01);
 
   //DDASEvent
-  DDASEvent *devent;
+  //DDASEvent *devent;
+
+  //RawHits
+  DDASRootFitEvent *rawhits;
 
   // nevents = 100;
 
@@ -141,17 +147,20 @@ int unpack_data(TTree *tree_in, TTree *tree_out, string Run_Number ) {
     reset_channel_list(channellist,channellist_it);
 
     //Make the event
-    devent = new DDASEvent();
+    //devent = new DDASEvent();
+    rawhits = new DDASRootFitEvent();
     //***NEEDED FOR EVT BLT***//
-    TBranch *aDDASevent = tree_in->GetBranch("ddasevent");
-    aDDASevent->SetAddress(&devent);
+    TBranch *aRawHitsevent = tree_in->GetBranch("RawHits");
+    aRawHitsevent->SetAddress(&rawhits);
 
     //Get the event
     tree_in->GetEntry(ii);
     
     //Make the channel list
-    vector<ddaschannel*> eventdata;
-    eventdata = devent->GetData();
+    //vector<ddaschannel*> eventdata;
+    vector<DDASRootFitHit*> eventdata;
+    //eventdata = devent->GetData();
+    eventdata = rawhits->GetData();
     channellist = eventdata;
 
     //Unpack the event
@@ -191,7 +200,7 @@ int unpack_data(TTree *tree_in, TTree *tree_out, string Run_Number ) {
 }
 
   
-int unpack_event(int eventnum, betadecay *bdecay, betadecayvariables *bdecayv,vector<ddaschannel*> channellist, vector<ddaschannel*>::iterator channellist_it )  {
+int unpack_event(int eventnum, betadecay *bdecay, betadecayvariables *bdecayv,vector<DDASRootFitHit*> channellist, vector<DDASRootFitHit*>::iterator channellist_it )  {
 
   bdecay->Reset();
   bdecayv->hit.Initialize();
@@ -264,11 +273,6 @@ int unpack_event(int eventnum, betadecay *bdecay, betadecayvariables *bdecayv,ve
     bdecay->time[adcnumber].timehigh[channum] = ((*channellist_it)->timehigh);
     bdecay->time[adcnumber].timefull[channum] = ((*channellist_it)->time);
     bdecay->time[adcnumber].timecfd[channum] = ((*channellist_it)->timecfd);
-
-    cout.precision(16);
-    if(adcnumber==1 && channum == 0) {
-      cout<<"time dynode: "<<bdecay->time[adcnumber].timefull[channum]<<endl;
-    }
     
     //  if(adcnumber==1 && channum == 1) {
     //    cout<<"time labr3_0: "<<bdecay->time[adcnumber].timefull[channum]<<endl;

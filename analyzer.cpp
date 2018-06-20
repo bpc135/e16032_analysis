@@ -284,7 +284,6 @@ void analyze_event(int crateid, int slotid, int channum, vector<UShort_t> trace,
     bdecay->pspmt.dyecal = bdecay->adc[adcnumber].channel[channum] + random3->Rndm();
     bdecay->pspmt.dytime = bdecay->time[adcnumber].timefull[channum]; //time
 
-    cout<<bdecay->pspmt.dytime<<endl;
     bdecay->pspmt.dyoverflow = overflow; //overflow
     bdecay->pspmt.dyamp = amplitude;
     bdecay->pspmt.dyarea = area;

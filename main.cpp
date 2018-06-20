@@ -36,6 +36,9 @@
 //#include "Parameters-ddas.h"
 #include "ddaschannel.h"
 #include "DDASEvent.h"
+#include "DDASRootFitEvent.h"
+#include "DDASRootFitHit.h"
+#include "DDASFitHit.h"
 
 //#include "Variables-ddas.h"
 #include "Cuts.h"
@@ -130,7 +133,8 @@ int main(int argc, char **argv) {
   //go through the data in the file
   if(havedata){
     //Get the data
-    tree_in = (TTree*)rootfile_in->Get("dchan");
+    //tree_in = (TTree*)rootfile_in->Get("dchan");
+    tree_in = (TTree*)rootfile_in->Get("DDASFit");
 
     //Unpack and Analyze data
     unpack_data(tree_in, tree_out, Run_Number);
