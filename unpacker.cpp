@@ -123,6 +123,8 @@ int unpack_data(TTree *tree_in, TTree *tree_out, string Run_Number ) {
   //DDASEvent
   DDASEvent *devent;
 
+  // nevents = 100;
+
   //Loop over all the events in the file
   for (Int_t ii=0; ii<nevents; ii++) {
 
@@ -262,6 +264,15 @@ int unpack_event(int eventnum, betadecay *bdecay, betadecayvariables *bdecayv,ve
     bdecay->time[adcnumber].timehigh[channum] = ((*channellist_it)->timehigh);
     bdecay->time[adcnumber].timefull[channum] = ((*channellist_it)->time);
     bdecay->time[adcnumber].timecfd[channum] = ((*channellist_it)->timecfd);
+
+    cout.precision(16);
+    if(adcnumber==1 && channum == 0) {
+      cout<<"time dynode: "<<bdecay->time[adcnumber].timefull[channum]<<endl;
+    }
+    
+    //  if(adcnumber==1 && channum == 1) {
+    //    cout<<"time labr3_0: "<<bdecay->time[adcnumber].timefull[channum]<<endl;
+    //  }
 
     //cout << "bdecay->adc[" << adcnumber << ".channel[" << channum << "] = " << bdecay->adc[adcnumber].channel[channum] << endl;
     

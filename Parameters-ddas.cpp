@@ -284,16 +284,27 @@ int bdecayTrace::ProcessTrace(int crateid, int slotid, int chanid){
 void bdecayTac::Reset()
 {
   pin01i2nE = -1;
+  pin01i2nA = -1;
   pin01i2nT = 0;
+
   pin01i2sE = -1;
+  pin01i2sA = -1;
   pin01i2sT = 0;
+
   pin02i2nE = -1;
+  pin02i2nA = -1;
   pin02i2nT = 0;
+
   pin02i2sE = -1;
+  pin02i2sA = -1;
   pin02i2sT = 0;
+
   i2ni2sE = -1;
+  i2ni2sA = -1;
   i2ni2sT = 0;
+
   pin01rfE = -1;
+  pin01rfA = -1;
   pin01rfT = 0;
 
   i2pos = -1;

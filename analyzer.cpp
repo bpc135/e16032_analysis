@@ -188,18 +188,19 @@ void analyze_event(int crateid, int slotid, int channum, vector<UShort_t> trace,
   //ID
   //0 = dynode
   //1 - 15 = LaBr3
-  //16 = CLYC (UMass Lowell)
+  //16 = Pin01
+  //17 = Pin02
+  //18 = Pin03
+  //19 = TAC1 : Pin01 - I2nTOF
+  //20 = TAC2 : Pin01 - I2sTOF
+  //21 = TAC3 : Pin02 - I2nTOF
+  //22 = TAC4 : Pin02 - I2sTOF
+  //23 = TAC5 : I2N-I2S 
+  //24 = TAC6 : Pin01-RF
   //30 = I2N
   //31 = I2S
-  //32 = Pin01
-  //33 = Pin02
-  //34 = Pin03
-  //35 = TAC1 : Pin01 - I2nTOF
-  //36 = TAC2 : Pin01 - I2sTOF
-  //37 = TAC3 : Pin02 - I2nTOF
-  //38 = TAC4 : Pin02 - I2sTOF
-  //39 = TAC5 : I2N-I2S 
-  //40 = TAC6 : Pin01-RF
+  //32 = CLYC1 (UMass Lowell)
+  //33 = CLYC2 (UMass Lowell)
   //48 - 63 = SeGA
   //64 - 319 = anodes (in rows from top to bottom)
   int id = (crateid * 208) + ((slotid - 2) * 16) + channum;
@@ -258,10 +259,11 @@ void analyze_event(int crateid, int slotid, int channum, vector<UShort_t> trace,
     loarea = int (utils->GetTraceDelay() / (int(1000./ModMSPS)));
     offset = int (40. / (int(1000./ModMSPS)));
     hiarea = loarea + offset;
+    
     utils->CalculateTraceArea_PR(trace,loarea,hiarea);
     area = utils->GetTraceArea();
     areacal = area * scale_fact[modnum];
-
+    
     utils->CheckOverflowUnderflow(trace,5,16000);  //cheating, 16 modules are running with low amplitude sinals so all should be fairly small
     overflow = utils->GetOverflow();
   }
@@ -281,11 +283,13 @@ void analyze_event(int crateid, int slotid, int channum, vector<UShort_t> trace,
     
     bdecay->pspmt.dyecal = bdecay->adc[adcnumber].channel[channum] + random3->Rndm();
     bdecay->pspmt.dytime = bdecay->time[adcnumber].timefull[channum]; //time
+
+    cout<<bdecay->pspmt.dytime<<endl;
     bdecay->pspmt.dyoverflow = overflow; //overflow
     bdecay->pspmt.dyamp = amplitude;
     bdecay->pspmt.dyarea = area;
 
-
+    /*
     //Double pulse stuff
     if(trace.size() > 0){
       vector<int> trigger_points;
@@ -446,7 +450,7 @@ void analyze_event(int crateid, int slotid, int channum, vector<UShort_t> trace,
 	    }
 	    string found;
 	    cin>>found;
-	  */
+	  
 	
 	} //end of check on trigger points vector size
 
@@ -458,7 +462,8 @@ void analyze_event(int crateid, int slotid, int channum, vector<UShort_t> trace,
       } // end overflow check (and energy requirement)
 
     } //end double pulse work
-    
+
+    */
   } //end of dynode processing (id = 0)
 
   //LaBr3
@@ -497,7 +502,7 @@ void analyze_event(int crateid, int slotid, int channum, vector<UShort_t> trace,
   }
 
   //Clyc
-  if(id >= 16 && id<29) {
+  if(id >= 32 && id<48) {
     int detnum = id;
     
     //Register energy
@@ -562,7 +567,7 @@ void analyze_event(int crateid, int slotid, int channum, vector<UShort_t> trace,
   }
 
   // Pin01
-  if( id == 32 ) {
+  if( id == 16 ) {
     bdecay->pin01.energy = bdecay->adc[adcnumber].channel[channum];
     bdecay->pin01.ecal = (bdecayv->pin01.slope*bdecay->pin01.energy + bdecayv->pin01.intercept);
     currenttime = bdecay->time[adcnumber].timefull[channum];
@@ -577,7 +582,7 @@ void analyze_event(int crateid, int slotid, int channum, vector<UShort_t> trace,
   }
 
   // Pin02
-  if( id == 33 ) {
+  if( id == 17 ) {
     bdecay->pin02.energy = bdecay->adc[adcnumber].channel[channum];
     bdecay->pin02.ecal = (bdecayv->pin02.slope*bdecay->pin02.energy + bdecayv->pin02.intercept);
     currenttime = bdecay->time[adcnumber].timefull[channum];
@@ -597,7 +602,7 @@ void analyze_event(int crateid, int slotid, int channum, vector<UShort_t> trace,
   }
 
   // Pin03
-  if ( id == 34 ) {
+  if ( id == 18 ) {
     bdecay->pin03.energy = bdecay->adc[adcnumber].channel[channum];
     bdecay->pin03.ecal = (bdecayv->pin03.slope*bdecay->pin03.energy + 
 			  bdecayv->pin03.intercept);
@@ -616,59 +621,71 @@ void analyze_event(int crateid, int slotid, int channum, vector<UShort_t> trace,
 
   //calculating I2 corrections from PIN01
   // TAC1 : Pin01 - I2nTOF
-  if( id == 35 ) {
+  if( id == 19 ) {
     bdecay->tac.pin01i2nE = bdecay->adc[adcnumber].channel[channum];  
     currenttime = bdecay->time[adcnumber].timefull[channum];
 
     // currenttime = bdecay->time[adcnumber].timelow[channum] + bdecay->time[adcnumber].timehigh[channum] * 4294967296.;
     bdecay->tac.pin01i2nT = (currenttime - starttime) + 3000.;
     bdecay->tac.i2ncorr = bdecay->tac.pin01i2nE;// + bdecay->tac.i2pos*0.9;
+
+    bdecay->tac.pin01i2nA = amplitude;
   }
 
   // TAC2 : Pin01 - I2sTOF TAC
-  if( id == 36 ) {
+  if( id == 20 ) {
     bdecay->tac.pin01i2sE = bdecay->adc[adcnumber].channel[channum];  
     currenttime = bdecay->time[adcnumber].timefull[channum];
     
     // //currenttime = bdecay->time[adcnumber].timelow[channum] + bdecay->time[adcnumber].timehigh[channum] * 4294967296.;
     bdecay->tac.pin01i2sT = (currenttime - starttime) + 3000.;
     bdecay->tac.i2scorr = bdecay->tac.pin01i2sE;// + bdecay->tac.i2pos*0.9;
+
+    bdecay->tac.pin01i2sA = amplitude;
   }
 
   // TAC3 : Pin02 - I2nTOF
-  if( id == 37 ) {
+  if( id == 21 ) {
     bdecay->tac.pin02i2nE = bdecay->adc[adcnumber].channel[channum];  
     currenttime = bdecay->time[adcnumber].timefull[channum];
 
     // currenttime = bdecay->time[adcnumber].timelow[channum] + bdecay->time[adcnumber].timehigh[channum] * 4294967296.;
     bdecay->tac.pin02i2nT = (currenttime - starttime) + 3000.;
+
+    bdecay->tac.pin02i2nT = amplitude;
   }
 
   // TAC4 : Pin02 - I2sTOF TAC
-  if( id == 38 ) {
+  if( id == 22 ) {
     bdecay->tac.pin02i2sE = bdecay->adc[adcnumber].channel[channum];  
     currenttime = bdecay->time[adcnumber].timefull[channum];
     
     // //currenttime = bdecay->time[adcnumber].timelow[channum] + bdecay->time[adcnumber].timehigh[channum] * 4294967296.;
     bdecay->tac.pin02i2sT = (currenttime - starttime) + 3000.;
+
+    bdecay->tac.pin02i2sA = amplitude;
   }
 
   // TAC5 : I2N - I2S
-  if( id == 39 ) {
+  if( id == 23 ) {
     bdecay->tac.i2ni2sE = bdecay->adc[adcnumber].channel[channum];  
     currenttime = bdecay->time[adcnumber].timefull[channum];
 
     //  currenttime = bdecay->time[adcnumber].timelow[channum] + bdecay->time[adcnumber].timehigh[channum] * 4294967296.;
     bdecay->tac.i2ni2sT = (currenttime - starttime) + 3000.;
+
+    bdecay->tac.i2ni2sT = amplitude;
   }
 
   // TAC6 : Pin01 - RF 
-  if( id == 40) {
+  if( id == 24) {
     bdecay->tac.pin01rfE = bdecay->adc[adcnumber].channel[channum];
     currenttime = bdecay->time[adcnumber].timefull[channum];
 
     // currenttime = bdecay->time[adcnumber].timelow[channum] + bdecay->time[adcnumber].timehigh[channum] * 4294967296.;
     bdecay->tac.pin01rfT = (currenttime - starttime) + 3000.;
+
+    bdecay->tac.pin01rfT = amplitude;
   }
   
 

@@ -79,26 +79,34 @@ class bdecayTac: public TObject
   
  public:
   int pin01i2nE = -1;
+  int pin01i2nA = -1;
   int pin01i2nT = 0;
+  
   int pin01i2sE = -1;
+  int pin01i2sA = -1;
   int pin01i2sT = 0;
+  
   int pin02i2nE = -1;
+  int pin02i2nA = -1;
   int pin02i2nT = 0;
+
   int pin02i2sE = -1;
+  int pin02i2sA = -1;
   int pin02i2sT = 0;
+
   int i2ni2sE = -1;
+  int i2ni2sA = -1;
   int i2ni2sT = 0;
+
   int pin01rfE = -1;
+  int pin01rfA = -1;
   int pin01rfT = 0;
 
   int i2pos = -1;
   int i2ncorr = -1;
   int i2scorr = -1;
   
-
  public:
-  //bdecayTac() {};
-  //~bdecayTac() {};
   void Reset();
 
   ClassDef(bdecayTac,1);
@@ -169,8 +177,6 @@ class bdecayPin: public TObject
   int eventtdc;
   
  public:
-  //bdecayPin() {};
-  //~bdecayPin() {};
   void Reset();
 
   ClassDef(bdecayPin,1);
