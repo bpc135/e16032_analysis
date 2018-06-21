@@ -22,7 +22,7 @@ void Chain(TChain *chain, int run_num) {
 
   //find all segments for the given run number in the histo_segments directory
   string run_num_str = Form("%04d",run_num);
-  string filemodifier = "e16032_analysis.root";
+  string filemodifier = "-e16032_analysis.root";
   
   DIR *dir;
   struct dirent *ent;

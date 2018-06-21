@@ -122,26 +122,32 @@ int unpack_data(TTree *tree_in, TTree *tree_out, string Run_Number ) {
   //Progress metrics
   int fiveper = (int)(nevents * 0.05);
   int oneper = (int)(nevents * 0.01);
+  int tenthper = (int)(nevents * 0.001);
 
   //DDASEvent
-  //DDASEvent *devent;
+  //DDASEvent *devent
+
+  vector<RootHitExtension>* fitdata(0);
+  tree_in->SetBranchAddress("HitFits", &fitdata);
 
   //RawHits
   DDASRootFitEvent *rawhits;
-
   // nevents = 100;
 
   //Loop over all the events in the file
   for (Int_t ii=0; ii<nevents; ii++) {
-
-    //Progress bar
+    // cout << "---------- new event\n";
+    // //Progress bar
     if( (ii % oneper) == 0) {
       cout << "Events processed " << ii << " - percent done " << (int)(ii/oneper)*1 << "%"<<endl;
-    }
-    //check with only 5% of the file
-    // if( (ii > 0) && (ii % fiveper) == 0) {
-    //   break;
-    // }
+      }
+    // if( (ii % tenthper) == 0) {
+    //cout << "Events processed " << ii << " - percent done " << (int)(ii/tenthper)*0.1 << "%"<<endl;
+    //}
+    //check with only 1% of the file
+    //if( (ii > 0) && (ii % oneper) == 0) {
+    // break;
+    //}
 
     //Reset the channel list from the last event
     reset_channel_list(channellist,channellist_it);
@@ -149,22 +155,43 @@ int unpack_data(TTree *tree_in, TTree *tree_out, string Run_Number ) {
     //Make the event
     //devent = new DDASEvent();
     rawhits = new DDASRootFitEvent();
+    
     //***NEEDED FOR EVT BLT***//
     TBranch *aRawHitsevent = tree_in->GetBranch("RawHits");
     aRawHitsevent->SetAddress(&rawhits);
+    
+    //    TBranch *fitBranch = tree_in->GetBranch("HitFits");
+    //   fitBranch->SetAddress(&fitdata);
 
+    
     //Get the event
     tree_in->GetEntry(ii);
+
+    vector<RootHitExtension>& fits(*fitdata);
     
     //Make the channel list
     //vector<ddaschannel*> eventdata;
     vector<DDASRootFitHit*> eventdata;
+   
+    //vector<DDASFitHit*> fitdata;
     //eventdata = devent->GetData();
     eventdata = rawhits->GetData();
     channellist = eventdata;
 
+    // cout << "This event has " << eventdata.size() << " hits\n";
+    // cout << "Fits size: " << fits.size() << endl;
+    // for (int i =0; i < fits.size(); i++) {
+    //   cout << "Hit " << i << (fits[i].haveExtension ? "Has" : "Does not have")<< " a fit attached to it\n";
+    //   if (fits[i].haveExtension) {
+    // 	RootFit1Info fit1 = fits[i].onePulseFit;
+    // 	cout << "Fit1 amplitude: " << fit1.pulse.amplitude << endl;
+    //   }
+    // }
+ 
     //Unpack the event
     unpack_event(ii,&bdecay,&bdecayv,channellist,channellist_it);
+
+    unpack_double_pulse(ii,&bdecay,fitdata);
   
     //Reset root output
     rootout->Reset();
@@ -172,8 +199,10 @@ int unpack_data(TTree *tree_in, TTree *tree_out, string Run_Number ) {
     //Correlate this event
     int impdec = corr.Correlate(bdecay,bdecayv,16,16,0);
 
+    
     //Fill with results of analysis
-    if(bdecay.pspmt.dyenergy>0 || bdecay.segatotal.mult>0 || bdecay.labr3.mult>0) {
+    // if(bdecay.pspmt.dyenergy>0 || bdecay.segatotal.mult>0 || bdecay.labr3.mult>0) {
+    if(bdecay.pspmt.dyenergy>0) {
       
       rootout->SetOutputValues(bdecay);
       rootout->clock = bdecay.clock;
@@ -224,6 +253,9 @@ int unpack_event(int eventnum, betadecay *bdecay, betadecayvariables *bdecayv,ve
   //bool dynode_present = false;
 
   for (channellist_it = channellist.begin(); channellist_it < channellist.end(); channellist_it++) {
+
+    //cout << (*channellist_it)->haveExtension << endl;
+
 
     int crateid = (*channellist_it)->crateid;
     int slotid = (*channellist_it)->slotid;
@@ -585,4 +617,64 @@ int unpack_event(int eventnum, betadecay *bdecay, betadecayvariables *bdecayv,ve
 
   }
   
+}
+
+void unpack_double_pulse(int eventnum,  betadecay *bdecay, vector <RootHitExtension> *fitdata){
+
+  vector<RootHitExtension>& fits(*fitdata);
+
+  // cout << "------------- in unpack_double_pulse -------------" << endl;
+  // cout << "Fits size: " << fits.size() << endl;
+  // for (int i =0; i < fits.size(); i++) {
+  //   cout << "Hit " << i << (fits[i].haveExtension ? "Has" : "Does not have")<< " a fit attached to it\n";
+  //   if (fits[i].haveExtension) {
+  //     RootFit1Info fit1 = fits[i].onePulseFit;
+  //     cout << "Fit1 amplitude: " << fit1.pulse.amplitude << endl;
+  //   }
+  // }
+
+  for(int i = 0; i < fits.size(); i++){
+    if (fits[i].haveExtension){
+      RootFit1Info fit1 = fits[i].onePulseFit;
+      RootFit2Info fit2 = fits[i].twoPulseFit;
+
+      //assign single pulse fit results
+      bdecay->pspmt.dyE1_single = fit1.pulse.amplitude;
+      bdecay->pspmt.dyT1_single = fit1.pulse.position;
+      bdecay->pspmt.dyE1_steepness_single = fit1.pulse.steepness;
+      bdecay->pspmt.dyE1_decayTime_single = fit1.pulse.decayTime;
+      bdecay->pspmt.dyoffset_single = fit1.offset;
+      bdecay->pspmt.dychisq_single = fit1.chiSquare;
+
+      //check organization for defining E2 to be the second pulse
+      if(fit2.pulses[0].position < fit2.pulses[1].position){
+
+	bdecay->pspmt.dyE1_double = fit2.pulses[0].amplitude;
+	bdecay->pspmt.dyT1_double = fit2.pulses[0].position;
+	bdecay->pspmt.dyE1_steepness_double = fit2.pulses[0].steepness;
+	bdecay->pspmt.dyE1_decayTime_double = fit2.pulses[0].decayTime;
+	bdecay->pspmt.dyE2_double = fit2.pulses[1].amplitude;
+	bdecay->pspmt.dyT2_double = fit2.pulses[1].position;
+	bdecay->pspmt.dyE2_steepness_double = fit2.pulses[1].steepness;
+	bdecay->pspmt.dyE2_decayTime_double = fit2.pulses[1].decayTime;
+	
+	
+      }else{
+	bdecay->pspmt.dyE1_double = fit2.pulses[1].amplitude;
+	bdecay->pspmt.dyT1_double = fit2.pulses[1].position;
+	bdecay->pspmt.dyE1_steepness_double = fit2.pulses[1].steepness;
+	bdecay->pspmt.dyE1_decayTime_double = fit2.pulses[1].decayTime;
+	bdecay->pspmt.dyE2_double = fit2.pulses[0].amplitude;
+	bdecay->pspmt.dyT2_double = fit2.pulses[0].position;
+	bdecay->pspmt.dyE2_steepness_double = fit2.pulses[0].steepness;
+	bdecay->pspmt.dyE2_decayTime_double = fit2.pulses[0].decayTime;
+      }
+      
+      bdecay->pspmt.dychisq_double = fit2.chiSquare;
+      bdecay->pspmt.dyoffset_double = fit2.offset;
+      bdecay->pspmt.dytdiffE1E2 = bdecay->pspmt.dyT2_double - bdecay->pspmt.dyT1_double;
+      
+    }
+  }
+
 }

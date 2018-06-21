@@ -350,11 +350,30 @@ class bdecayPSPMT: public TObject
   double dytime;
   double dytdiff;  //time difference between dynode and anode with highest amplitude
   //double pulse
-  double dyE1;
-  double dyT1;
-  double dyE2;
-  double dyT2;
+  double dyE1_double;
+  double dyT1_double;
+  double dyE1_steepness_double;
+  double dyE1_decayTime_double;
+  double dyE2_double;
+  double dyT2_double;
+  double dyE2_steepness_double;
+  double dyE2_decayTime_double;
+  double dychisq_double;
+  double dyoffset_double;
   double dytdiffE1E2;
+  double dyE1_single;
+  double dyT1_single;
+  double dychisq_single;
+  double dyoffset_single;
+  double dyE1_steepness_single; 
+  double dyE1_decayTime_single;
+
+  double testsig;
+  double testamp;
+  double testarea;
+  double testtime;
+  double testoverflow;
+  
 
   //anode
   double aenergy[258];

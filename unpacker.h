@@ -6,6 +6,7 @@
 #include "DDASEvent.h"
 #include "DDASRootFitEvent.h"
 #include "DDASRootFitHit.h"
+#include "DDASFitHit.h"
 
 //File Includes
 #include "Parameters-ddas.h"
@@ -25,6 +26,6 @@ void reset_channel_list(vector<DDASRootFitHit*> channellist,  vector<DDASRootFit
 //int unpack_event(int eventnum, betadecay *bdecay, betadecayvariables *bdecayv);
 int unpack_event(int eventnum, betadecay *bdecay, betadecayvariables *bdecayv, vector<DDASRootFitHit*> channellist,vector<DDASRootFitHit*>::iterator channellist_it);
 
-void MapChannels(int crateid, int slotid, int channum, vector<UShort_t> trace, betadecay *bdecay, betadecayvariables *bdecayv, int eventnum);
+void unpack_double_pulse(int eventnum, betadecay *bdecay, vector <RootHitExtension> *fitdata);
   
 #endif

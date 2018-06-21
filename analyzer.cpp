@@ -276,15 +276,25 @@ void analyze_event(int crateid, int slotid, int channum, vector<UShort_t> trace,
   //PSPMT dynode
   if( id == 0){
 
+    bdecay->pspmt.dyoverflow = overflow; //overflow
+
+    //if the dynode overflows, put a large number for the energy so that it does not read "0"
+
     //set initial dynode parameters
     bdecay->pspmt.dyenergy = bdecay->adc[adcnumber].channel[channum]; //Pixie energy
 
     //  cout<<endl<<"Dynode: "<<bdecay->pspmt.dyenergy<<endl<<endl;
     
     bdecay->pspmt.dyecal = bdecay->adc[adcnumber].channel[channum] + random3->Rndm();
+
+    if(bdecay->pspmt.dyoverflow == 1){
+      bdecay->pspmt.dyenergy = 99999;
+      bdecay->pspmt.dyecal = 99999;
+      
+    }
+    
     bdecay->pspmt.dytime = bdecay->time[adcnumber].timefull[channum]; //time
 
-    bdecay->pspmt.dyoverflow = overflow; //overflow
     bdecay->pspmt.dyamp = amplitude;
     bdecay->pspmt.dyarea = area;
 
@@ -807,9 +817,23 @@ void analyze_event(int crateid, int slotid, int channum, vector<UShort_t> trace,
     // }
     
     // } // end requirement of the first trigger from this channel in the event
-  }      
+  }
+
+  if(id == 44){
+
+    bdecay->pspmt.testsig = bdecay->adc[adcnumber].channel[channum];
+    bdecay->pspmt.testamp = amplitude;
+    bdecay->pspmt.testarea = area;
+    bdecay->pspmt.testtime = bdecay->time[adcnumber].timefull[channum];
+    bdecay->pspmt.testoverflow = overflow;
+    cout << "have the event" << endl;
+    
+    
+  }
   
     
   utils->Delete();
   
 }
+
+

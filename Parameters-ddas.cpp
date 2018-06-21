@@ -439,7 +439,6 @@ void bdecaySegaTotal::Reset()
 void bdecayLaBr3::Reset()
 {
   mult = 0;
-
   memset(timecfd,0,17*sizeof(double));
   memset(timelow,0,17*sizeof(double));
   memset(timehigh, 0,17*sizeof(double));
@@ -552,13 +551,31 @@ void bdecayPSPMT::Reset()
   dyoverflow = -1;
   dytime = 0;
   dytdiff = 0;
+
+  testsig = -1;
+  testamp = -1;
+  testarea = -1;
+  testtime = -1;
+  testoverflow = -1;
   
   //double pulse
-  dyE1=-1;
-  dyT1=-1;
-  dyE2=-1;
-  dyT2=-1;
-  dytdiffE1E2 =-1;
+  dyE1_double = -1;
+  dyT1_double = -1;
+  dyE1_steepness_double = -1;
+  dyE1_decayTime_double = -1;
+  dyE2_double = -1;
+  dyT2_double = -1;
+  dyE2_steepness_double = -1;
+  dyE2_decayTime_double = -1;
+  dychisq_double = -1;
+  dyoffset_double = -1;
+  dytdiffE1E2 = -1;
+  dyE1_single = -1;
+  dyT1_single = -1;
+  dychisq_single = -1;
+  dyoffset_single = -1;
+  dyE1_steepness_single = -1; 
+  dyE1_decayTime_single = -1;
 
   //anode
   asum = -1;

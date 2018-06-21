@@ -3,6 +3,8 @@ correlator.o
 Variables-ddas.o
 unpacker.o
 main.o
+e16032_analysis
+libParameters-ddas.so
 Parameters-ddasDictionary.cxx
 Parameters-ddasDictionary_rdict.pcm
 .nfs000000000415b04900036dab
