@@ -241,6 +241,9 @@ class bdecayCorr: public TObject
   float iisum;
   float iimax;
   int itof;
+  double iasum; // yx
+  double idyecal; // yx
+  //
   double gtimecal;
   double gtime;
   int gde1;
@@ -249,12 +252,34 @@ class bdecayCorr: public TObject
   float gisum;
   float gimax;
   int gtof;
+  // for labr3, yx
+  double ltimecal;
+  double ltime;
+  int lde1;
+  int lde2;
+  int lde3;
+  float lisum;
+  float limax;
+  int ltof;
+  // for clyc, yx
+  double ctimecal;
+  double ctime;
+  int cde1;
+  int cde2;
+  int cde3;
+  float cisum;
+  float cimax;
+  int ctof;
+  //
   double dtimecal;
   double dtime;
-  int dfrontch;
-  int dbackch;
-  int frontch;
-  int backch;
+  double xPos; // yx
+  double yPos; // yx
+  int implantX; // yx
+  int implantY; // yx
+  int decayX; // yx
+  int decayY; // yx 
+  
   int dde1;
   int dde2;
   int dde3;
@@ -345,7 +370,9 @@ class bdecayPSPMT: public TObject
   double dyenergy;
   double dyecal;
   double dyamp;
+  double dyampcal;
   double dyarea;
+  double dyareacal;
   int dyoverflow;
   double dytime;
   double dytdiff;  //time difference between dynode and anode with highest amplitude
@@ -381,10 +408,14 @@ class bdecayPSPMT: public TObject
   double asum;
   double atime[258];
   double amax;
+  double amaxcal;
+  double atdiff[258];
   int aoverflow[258];
   int amult;
   int amaxx;
   int amaxy;
+  double amaxxcal;
+  double amaxycal;
   double amaxtime;
   double posxEcent;
   double posyEcent;
@@ -398,6 +429,7 @@ class bdecayPSPMT: public TObject
   double aampcal[258];
   double aampsum;
   int aampmax;
+  double aampmaxcal;
   int aampmaxx;
   int aampmaxy;
   double aampmaxtime;
@@ -409,6 +441,7 @@ class bdecayPSPMT: public TObject
   double aampmaxcentcal;
   double aampsumcent;
   double aampsumcent50;
+  int aoverflowcount;
   
   double aarea[258];
   double aareacal[258];

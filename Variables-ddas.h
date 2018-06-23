@@ -28,6 +28,8 @@ class bdecayvPinCalibrator
   float slope;
   float intercept;
   float thresh;
+  float ithresh;
+  float iuld;
 
  public:
   bdecayvPinCalibrator();

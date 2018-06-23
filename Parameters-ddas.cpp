@@ -314,7 +314,7 @@ void bdecayTac::Reset()
 
 void bdecayAdc::Reset()
 {
-  memset(channel,-1,16*sizeof(int));
+  memset(channel,0,16*sizeof(int));
   for(int i=0; i<16; i++){
     chantrace[i].Reset();
   }
@@ -368,6 +368,7 @@ void bdecayPid::Reset()
 void bdecayCorr::Reset()
 {
   dtimplant = -1;
+  //
   itime = -1;
   ide1 = -1;
   ide2 = -1;
@@ -375,6 +376,9 @@ void bdecayCorr::Reset()
   iisum = -1;
   iimax = -1;
   itof = -1;
+  iasum = -1; // yx
+  idyecal = -1; // yx
+  //
   gtimecal = -1;
   gtime = -1;
   gde1 = -1;
@@ -383,8 +387,28 @@ void bdecayCorr::Reset()
   gisum = -1;
   gimax = -1;
   gtof = -1;
+  // yx
+  ltimecal = -1;
+  ltime = -1;
+  lde1 = -1;
+  lde2 = -1;
+  lde3 = -1;
+  lisum = -1;
+  limax = -1;
+  ltof = -1;
+  // yx
+  ctimecal = -1;
+  ctime = -1;
+  cde1 = -1;
+  cde2 = -1;
+  cde3 = -1;
+  cisum = -1;
+  cimax = -1;
+  ctof = -1;
+  
   dtimecal = -1;
   dtime = -1;
+  
   dde1 = -1;
   dde2 = -1;
   dde3 = -1;
@@ -417,12 +441,12 @@ void bdecaySega::Reset()
   memset(time,0,17*sizeof(double));
   memset(timelow,0,17*sizeof(double));
   memset(timehigh, 0,17*sizeof(double));
-  memset(dtdc, -1,17*sizeof(double));
-  memset(itdc, -1,17*sizeof(double));
-  memset(eventtdc,-1,17*sizeof(double));
-  memset(energy,-1,17*sizeof(double));
-  memset(goodenergy, -1,17*sizeof(double));
-  memset(ecal, -1,17*sizeof(double));
+  memset(dtdc, 0,17*sizeof(double));
+  memset(itdc, 0,17*sizeof(double));
+  memset(eventtdc,0,17*sizeof(double));
+  memset(energy,0,17*sizeof(double));
+  memset(goodenergy, 0,17*sizeof(double));
+  memset(ecal, 0,17*sizeof(double));
 }
 
 void bdecaySegaTotal::Reset()
@@ -442,17 +466,17 @@ void bdecayLaBr3::Reset()
   memset(timecfd,0,17*sizeof(double));
   memset(timelow,0,17*sizeof(double));
   memset(timehigh, 0,17*sizeof(double));
-  memset(dtdc, -1,17*sizeof(double));
-  memset(itdc, -1,17*sizeof(double));
-  memset(eventtdc,-1,17*sizeof(double));
-  memset(energy,-1,17*sizeof(double));
-  memset(goodenergy, -1,17*sizeof(double));
-  memset(ecal, -1,17*sizeof(double));
+  memset(dtdc, 0,17*sizeof(double));
+  memset(itdc, 0,17*sizeof(double));
+  memset(eventtdc,0,17*sizeof(double));
+  memset(energy,0,17*sizeof(double));
+  memset(goodenergy, 0,17*sizeof(double));
+  memset(ecal, 0,17*sizeof(double));
   memset(time, 0, 17*sizeof(double));
   //initialize the differences to -10000000 so we know when it wasn't set
   memset(tdiff, 100000, 17*17*sizeof(double));
-  memset(amp,-1,17*sizeof(double));
-  memset(ampcal,-1,17*sizeof(double));
+  memset(amp,0,17*sizeof(double));
+  memset(ampcal,0,17*sizeof(double));
   memset(area,0,17*sizeof(double));
   memset(areacal,0,17*sizeof(double));
   //initialize the differences to -10000000 so we know when it wasn't set
@@ -481,16 +505,16 @@ void bdecayCLYC::Reset()
   memset(timecfd,0,17*sizeof(double));
   memset(timelow,0,17*sizeof(double));
   memset(timehigh, 0,17*sizeof(double));
-  memset(dtdc, -1,17*sizeof(double));
-  memset(itdc, -1,17*sizeof(double));
-  memset(eventtdc,-1,17*sizeof(double));
-  memset(energy,-1,17*sizeof(double));
-  memset(ecal, -1,17*sizeof(double));
+  memset(dtdc, 0,17*sizeof(double));
+  memset(itdc, 0,17*sizeof(double));
+  memset(eventtdc,0,17*sizeof(double));
+  memset(energy,0,17*sizeof(double));
+  memset(ecal, 0,17*sizeof(double));
   memset(time, 0, 17*sizeof(double));
   //initialize the differences to -10000000 so we know when it wasn't set
   memset(tdiff, 100000, 17*17*sizeof(double));
-  memset(amp,-1,17*sizeof(double));
-  memset(ampcal,-1,17*sizeof(double));
+  memset(amp,0,17*sizeof(double));
+  memset(ampcal,0,17*sizeof(double));
   memset(area,0,17*sizeof(double));
   memset(areacal,0,17*sizeof(double));
   //initialize the differences to -10000000 so we know when it wasn't set
@@ -515,29 +539,30 @@ void bdecayCLYCTotal::Reset()
 void bdecayPSPMT::Reset()
 {
 
-  memset(aenergy,-1,258*sizeof(double));
-  memset(aecal,-1,258*sizeof(double));
+  memset(aenergy,0,258*sizeof(double));
+  memset(aecal,0,258*sizeof(double));
   memset(atime,0,258*sizeof(double));
-  memset(aoverflow,-1,258*sizeof(double));
+  memset(aoverflow,0,258*sizeof(double));
+  memset(atdiff,0,258*sizeof(double));
 
-  memset(aamp,-1,258*sizeof(double));
-  memset(aampcal,-1,258*sizeof(double));
+  memset(aamp,0,258*sizeof(double));
+  memset(aampcal,0,258*sizeof(double));
   
-  memset(aarea,-1,258*sizeof(double));
-  memset(aareacal,-1,258*sizeof(double));
+  memset(aarea,0,258*sizeof(double));
+  memset(aareacal,0,258*sizeof(double));
   
-  memset(lowpoint,-1,258*sizeof(double));
-  memset(baseline,-1,258*sizeof(double));
+  memset(lowpoint,0,258*sizeof(double));
+  memset(baseline,0,258*sizeof(double));
   memset(ratio,0,258*sizeof(double));
   
   memset(pixmult,0,258*sizeof(int));
   
-  memset(loaenergy,-1,258*sizeof(double));
-  memset(loaecal,-1,258*sizeof(double));
-  memset(loaamp,-1,258*sizeof(double));
-  memset(loaampcal,-1,258*sizeof(double));
-  memset(loaarea,-1,258*sizeof(double));
-  memset(loaareacal,-1,258*sizeof(double));
+  memset(loaenergy,0,258*sizeof(double));
+  memset(loaecal,0,258*sizeof(double));
+  memset(loaamp,0,258*sizeof(double));
+  memset(loaampcal,0,258*sizeof(double));
+  memset(loaarea,0,258*sizeof(double));
+  memset(loaareacal,0,258*sizeof(double));
   
   memset(loatime,0,258*sizeof(double));
   memset(loatdiff,0,258*sizeof(double));
@@ -547,7 +572,9 @@ void bdecayPSPMT::Reset()
   dyenergy = -1;
   dyecal = -1;
   dyamp = -1;
+  dyampcal = -1;
   dyarea = -1;
+  dyareacal = -1;
   dyoverflow = -1;
   dytime = 0;
   dytdiff = 0;
@@ -587,6 +614,7 @@ void bdecayPSPMT::Reset()
   amaxx = 0;
   amaxy = 0;
   amaxtime = 0;
+  aoverflowcount = 0;
   posxEcent = 0;
   posyEcent = 0;
   posxEcent50 = 0;
@@ -603,6 +631,10 @@ void bdecayPSPMT::Reset()
   aampmaxcentcal = -1;
   aampsumcent = -1;
   aampsumcent50 = -1;
+  aampmax = 0;
+  aampmaxcal = 0;
+  aampmaxx = 0;
+  aampmaxy = 0;
   
   posxareacent = -1;
   posyareacent = -1;
@@ -687,6 +719,6 @@ void bdecayDdasDiagnostics::Reset()
   cmult = 0;
   eventlength = -1;
   tdiffevent = -1;
-  memset(adchit, -1,20*sizeof(int));
+  memset(adchit, 0,20*sizeof(int));
 
 }

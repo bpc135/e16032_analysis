@@ -21,10 +21,6 @@ class IMPLANT
 {
  public:
   bool implanted;
-  bool decayed;
-  double timehigh;
-  double timelow;
-  double timecfd;
   double time;  /* Time of event, in 30.5 us clockticks */
   long dE1;   /* dE from PIN01 */
   long dE2;   /* dE from PIN02 */
@@ -33,6 +29,21 @@ class IMPLANT
   long imax;  /* Total implant energy (from max) */
   long tof;   /* Time of flight */
   double dt;    /* Time since last implant */
+  // from spectcl
+  double asum;
+  double dyecal;
+  double amax;  /* Total implant energy (from max) */
+  double amaxx;  /* Total implant energy (from max) */
+  double amaxy;  /* Total implant energy (from max) */
+  double posxEcent;  /* Total implant energy (from max) */
+  double posyEcent;  /* Total implant energy (from max) */
+  double posxEcent50;  /* Total implant energy (from max) */
+  double posyEcent50;  /* Total implant energy (from max) */
+  // specially 4 DSSD? 
+  bool decayed;
+  double timehigh;
+  double timelow;
+  double timecfd;
   int numcorr; /* number of times this implant has been used in a correlation */
 };
 
@@ -40,18 +51,29 @@ class DECAY
 {
  public:
   double time; /* Time of event, in 30.5 us clockticks */
-  double timehigh;
-  double timelow;
-  double timecfd;
   long dE1;  /* dE from PIN01 */
   long dE2;  /* dE from PIN02 */
   long dE3;  /* dE from PIN03 */
   long isum; /* Total implant energy (from sums) */
-  long imax; /* Total implant energy (from max) */
   long tof;  /* Time of flight (for implant event) */
   double dt;   /* Time since implant */
   double decaydt; /* Time between last decay */
   int dnumcorr; /* number of decays correlated to ion*/
+  // from spectcl
+  double asum;
+  double dyecal;
+  double amax;  /* Total implant energy (from max) */
+  double amaxx;  /* Total implant energy (from max) */
+  double amaxy;  /* Total implant energy (from max) */
+  double posxEcent;  /* Total implant energy (from max) */
+  double posyEcent;  /* Total implant energy (from max) */
+  double posxEcent50;  /* Total implant energy (from max) */
+  double posyEcent50;  /* Total implant energy (from max) */
+  // specially 4 DSSD? 
+  double timehigh;
+  double timelow;
+  double timecfd;
+  long imax; /* Total implant energy (from max) */
 };
 
 
@@ -60,9 +82,9 @@ class Correlator
 {
  public:
   
-  IMPLANT implant[41][41];
-  DECAY decay[41][41];
-  
+  IMPLANT implant[17][17];
+  DECAY decay[17][17];
+  /*  
   TCutG *co70i;
   TCutG *goodtof;
   TCutG *misctof;
@@ -73,7 +95,7 @@ class Correlator
   TCutG* co69i1;
   TCutG *co70i1;
   TCutG *fe68i1;
-  
+  */
 
   //TRandom3 *random3;
 

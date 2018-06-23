@@ -12,7 +12,7 @@
 
 //specify the folder where the default calibration files are found.  This folder
 //has the default calibration files for the LaBr3 and Segas
-char calDefaultPath[] = "/user/e16032/RootAnalysis_Scripted/cal";
+char calDefaultPath[] = "/user/e16032/RootAnalysis_Scripted_BC/e16032_analysis_full/cal";
 
 //specify each default calibration files
 string SegaDefault;
@@ -81,15 +81,18 @@ int unpack_data(TTree *tree_in, TTree *tree_out, string Run_Number ) {
   char PSPMTInitName[100];
   
   string tempsega;
-  tempsega = "SeGAInit_"+Run_Number.substr(0,4)+".txt";
+  //tempsega = "SeGAInit_"+Run_Number.substr(0,4)+".txt";
+  tempsega = "SeGAInit_basic.txt";
   SegaDefault = tempsega;
 
   string templabr3;
-  templabr3 = "LaBr3Init_"+Run_Number.substr(0,4)+".txt";
+  //templabr3 = "LaBr3Init_"+Run_Number.substr(0,4)+".txt";
+  templabr3 = "LaBr3Init_basic.txt";
   LaBr3Default = templabr3;
 
   string temppspmt;
-  temppspmt = "PSPMTInit_"+Run_Number.substr(0,4)+".txt";
+  //temppspmt = "PSPMTInit_"+Run_Number.substr(0,4)+".txt";
+  temppspmt = "PSPMTInit_basic.txt";
   PSPMTDefault = temppspmt;
     
   cout<<SegaDefault<<endl;
@@ -145,9 +148,9 @@ int unpack_data(TTree *tree_in, TTree *tree_out, string Run_Number ) {
     //cout << "Events processed " << ii << " - percent done " << (int)(ii/tenthper)*0.1 << "%"<<endl;
     //}
     //check with only 1% of the file
-    //if( (ii > 0) && (ii % oneper) == 0) {
-    // break;
-    //}
+    // if( (ii > 0) && (ii % oneper) == 0) {
+    //   break;
+    // }
 
     //Reset the channel list from the last event
     reset_channel_list(channellist,channellist_it);
@@ -202,7 +205,7 @@ int unpack_data(TTree *tree_in, TTree *tree_out, string Run_Number ) {
     
     //Fill with results of analysis
     // if(bdecay.pspmt.dyenergy>0 || bdecay.segatotal.mult>0 || bdecay.labr3.mult>0) {
-    if(bdecay.pspmt.dyenergy>0) {
+    if(bdecay.pspmt.dyenergy>0 || bdecay.pspmt.amult > 0) {
       
       rootout->SetOutputValues(bdecay);
       rootout->clock = bdecay.clock;
@@ -347,6 +350,8 @@ int unpack_event(int eventnum, betadecay *bdecay, betadecayvariables *bdecayv,ve
   int maxch = -1;
   int maxch2 = -1;
   int mult = 0;
+
+  int ampcounter = 0;
   
   numerator = 0;
   denominator = 0;
@@ -372,15 +377,19 @@ int unpack_event(int eventnum, betadecay *bdecay, betadecayvariables *bdecayv,ve
   bdecay->pspmt.dytdiff = bdecay->pspmt.dytime - bdecay->pspmt.amaxtime;
     
   //Determine x and y positions for pspmt
-  double asumcent, asumcent50, aampsumcent, aampsumcent50, aareasumcent, aareasumcent50, amaxcent, aampmaxcent, aampmaxcentcal, aareacent, aareamaxcent,aareamaxcentcal = 0.0;
+  double asumcent, asumcent50, aampsumcent, aampsumcent50, aareasumcent, aareasumcent50, amaxcent, aampmaxcent, aampmaxcentcal, aareacent, aareamaxcent,aareamaxcentcal = -1.0;
 
   //first determine maxima within the intended thresholds for the centroid determinations
   for(int i=1; i<257; i++){
+
+    if(bdecay->pspmt.aamp[i] > 0 && bdecay->pspmt.dytime > 0){
+      bdecay->pspmt.atdiff[i] = bdecay->pspmt.dytime - bdecay->pspmt.atime[i];
+    }
       
     //pixie energies
-    if(bdecay->pspmt.aecal[i] > 0 && bdecay->pspmt.aecal[i] < 30000){
+    if(bdecay->pspmt.aecal[i] > 0 && bdecay->pspmt.aecal[i] < 100000 ){
 
-      bdecayv->hit.pspmt = 1;
+      if(bdecay->pspmt.dyecal>0) bdecayv->hit.pspmt = 1;
       if(bdecay->pspmt.aecal[i] > amaxcent){
 	amaxcent = bdecay->pspmt.aecal[i];
       }
@@ -393,7 +402,7 @@ int unpack_event(int eventnum, betadecay *bdecay, betadecayvariables *bdecayv,ve
       if(bdecay->pspmt.aampcal[i] > aampmaxcentcal){
 	aampmaxcentcal = bdecay->pspmt.aampcal[i];
       }
-      if(bdecay->pspmt.aamp[i] > amaxcent){
+      if(bdecay->pspmt.aamp[i] > aampmaxcent){
 	aampmaxcent = bdecay->pspmt.aamp[i];
       }
       
@@ -404,7 +413,7 @@ int unpack_event(int eventnum, betadecay *bdecay, betadecayvariables *bdecayv,ve
       if(bdecay->pspmt.aareacal[i] > aareamaxcentcal){
 	aareamaxcentcal = bdecay->pspmt.aareacal[i];
       }
-      if(bdecay->pspmt.aarea[i] > amaxcent){
+      if(bdecay->pspmt.aarea[i] > aareamaxcent){
 	aareamaxcent = bdecay->pspmt.aarea[i];
       }
 
@@ -422,14 +431,14 @@ int unpack_event(int eventnum, betadecay *bdecay, betadecayvariables *bdecayv,ve
   bdecay->pspmt.aareamaxcent = aareamaxcent;
   bdecay->pspmt.aareamaxcentcal = aareamaxcentcal;
 
- 
+  
   
   for(int i = 1; i < 257; i++){
 
     int xpix = (int)((i-1) % 16);
     int ypix = (int)((i-1) / 16);
 
-    if(bdecay->pspmt.aecal[i] > 0 && bdecay->pspmt.aecal[i] < 30000){
+    if(bdecay->pspmt.aecal[i] > 0 && bdecay->pspmt.aecal[i] < 100000 && bdecay->pspmt.atdiff[i] < 1500){
      
       //pixieEcent
       bdecay->pspmt.posxEcent += xpix * bdecay->pspmt.aecal[i];
@@ -447,9 +456,10 @@ int unpack_event(int eventnum, betadecay *bdecay, betadecayvariables *bdecayv,ve
       bdecay->pspmt.posxampcent += xpix * bdecay->pspmt.aampcal[i];
       bdecay->pspmt.posyampcent += ypix * bdecay->pspmt.aampcal[i];
       aampsumcent += bdecay->pspmt.aampcal[i];
+      
 
       //calculate the centroids using 50% of maximum anode values
-      if(bdecay->pspmt.aampcal[i] > (0.5 * bdecay->pspmt.aampmax)){
+      if(bdecay->pspmt.aampcal[i] > (0.5 * bdecay->pspmt.aampmaxcentcal)){
 	
 	bdecay->pspmt.posxampcent50 += xpix * bdecay->pspmt.aampcal[i];
 	bdecay->pspmt.posyampcent50 += ypix * bdecay->pspmt.aampcal[i];
@@ -462,7 +472,7 @@ int unpack_event(int eventnum, betadecay *bdecay, betadecayvariables *bdecayv,ve
       aareasumcent += bdecay->pspmt.aareacal[i];
       
       //calculate the centroids using 50% of maximum anode values
-      if(bdecay->pspmt.aareacal[i] > (0.5 * bdecay->pspmt.aareamax)){
+      if(bdecay->pspmt.aareacal[i] > (0.5 * bdecay->pspmt.aareamaxcentcal)){
 	bdecay->pspmt.posxareacent50 += xpix * bdecay->pspmt.aareacal[i];
 	bdecay->pspmt.posyareacent50 += ypix * bdecay->pspmt.aareacal[i];
 	aareasumcent50 += bdecay->pspmt.aareacal[i];
@@ -477,6 +487,17 @@ int unpack_event(int eventnum, betadecay *bdecay, betadecayvariables *bdecayv,ve
   bdecay->pspmt.aareasumcent = aareasumcent;
   bdecay->pspmt.aareasumcent50 = aareasumcent50;
 
+  // if(ampcounter < 20 && bdecay->pspmt.dyamp > 0 && bdecay->pin01.energy > 0){
+  //   cout << endl;
+  //   for(int i = 0; i < 258; i++){
+  //     cout << "i = " << i << ": " << bdecay->pspmt.aenergy[i] << endl;
+  //     cout << "i = " << i << ": " << bdecay->pspmt.aampcal[i] << endl;
+  //     cout << "i = " << i << ": " << bdecay->pspmt.aamp[i] << endl;
+  //     cout << "i = " << i << ": " << bdecay->pspmt.aareacal[i] << endl;
+  //     cout << "i = " << i << ": " << bdecay->pspmt.aarea[i] << endl;
+  //   }
+  //   ampcounter++;
+  // }
 
   // if(bdecay->pspmt.posxEcent50 < 0.1 && bdecay->pspmt.posyEcent50){
   //   cout << "asum50 = " << asum50 << ", amax = " <<  bdecay->pspmt.amax << ", amaxx = " << bdecay->pspmt.amaxx << ", amaxy = " << bdecay->pspmt.amaxy << endl;
@@ -582,7 +603,6 @@ int unpack_event(int eventnum, betadecay *bdecay, betadecayvariables *bdecayv,ve
     bdecay->pspmt.loposxareacent50 = bdecay->pspmt.loposxareacent50 / loaareasum50;
     bdecay->pspmt.loposyareacent50 = bdecay->pspmt.loposyareacent50 / loaareasum50;
 
-    
 
     //relic from e14057: leaving as a reminder that looking at ratios of areas to amplitudes can
     //help understand the overflows

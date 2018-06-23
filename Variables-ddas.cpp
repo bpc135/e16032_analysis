@@ -40,6 +40,8 @@ void bdecayvPinCalibrator::Initialize()
   slope     = 1.;
   intercept = 0.;
   thresh    = 0;
+  ithresh   = 0;
+  iuld      = 100000;
 }
 
 bdecayvTacCalibrator::bdecayvTacCalibrator(){
@@ -674,28 +676,30 @@ void betadecayvariables::ReadOther(char *Name){
 	if(linenum == 7) pin01.slope = value;
 	if(linenum == 8) pin01.intercept = value;
 	if(linenum == 9) pin01.thresh = value;
-	if(linenum == 10) pin02.slope = value;
-	if(linenum == 11) pin02.intercept = value;
-	if(linenum == 12) pin02.thresh = value;
-	if(linenum == 13) pin03.slope = value;
-	if(linenum == 14) pin03.intercept = value;
-	if(linenum == 15) pin03.thresh = value;
-	if(linenum == 16) tac.i2ncorr = value;
-	if(linenum == 17) tac.i2ncorrpos = value;
-	if(linenum == 18) tac.pin01corr1 = value;
-	if(linenum == 19) tac.pin01corr2 = value;
-	if(linenum == 20) tac.i2scorr = value;
-	if(linenum == 21) tac.i2scorr_offset = value;
-	if(linenum == 22) tac.pin01corr = value;
-	if(linenum == 23) tac.pin01corr_offset = value;
-	if(linenum == 24) tac.pin02corr = value;
-	if(linenum == 25) tac.pin02corr_offset = value;
-	if(linenum == 26) i2n.slope = value;
-	if(linenum == 27) i2n.intercept = value;
-	if(linenum == 28) i2n.thresh = value;
-	if(linenum == 29) i2s.slope = value;
-	if(linenum == 30) i2s.intercept = value;
-	if(linenum == 31) i2s.thresh = value;
+	if(linenum == 10) pin01.ithresh = value;
+	if(linenum == 11) pin01.iuld = value;
+	if(linenum == 12) pin02.slope = value;
+	if(linenum == 13) pin02.intercept = value;
+	if(linenum == 14) pin02.thresh = value;
+	if(linenum == 15) pin03.slope = value;
+	if(linenum == 16) pin03.intercept = value;
+	if(linenum == 17) pin03.thresh = value;
+	if(linenum == 18) tac.i2ncorr = value;
+	if(linenum == 19) tac.i2ncorrpos = value;
+	if(linenum == 20) tac.pin01corr1 = value;
+	if(linenum == 21) tac.pin01corr2 = value;
+	if(linenum == 22) tac.i2scorr = value;
+	if(linenum == 23) tac.i2scorr_offset = value;
+	if(linenum == 24) tac.pin01corr = value;
+	if(linenum == 25) tac.pin01corr_offset = value;
+	if(linenum == 26) tac.pin02corr = value;
+	if(linenum == 27) tac.pin02corr_offset = value;
+	if(linenum == 28) i2n.slope = value;
+	if(linenum == 29) i2n.intercept = value;
+	if(linenum == 30) i2n.thresh = value;
+	if(linenum == 31) i2s.slope = value;
+	if(linenum == 32) i2s.intercept = value;
+	if(linenum == 33) i2s.thresh = value;
 
 
       } // line read
