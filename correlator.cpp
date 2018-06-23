@@ -14,20 +14,21 @@
 
 #include "correlator.h"
 
-/************************************
- * Correlation flags:               *
- * ================================ *
- *  4 - invalid pspmt implant pixel *
- *  8 - invalid pspmt decay pixel   *
- * 12 - ion implantation            *
- * 16 - decay                       *
- * 20 - unknown                     *
- * 24 - invalid implant time        *
- * 28 - invalid decay time          *
- * 32 - exceeded correlation time   *
- * ================================ *
- * 56 - reset correlation aray      * 
- ************************************/
+/****************************************
+ * Correlation flags:                   *
+ * ==================================== *
+ *  4 - invalid pspmt implant pixel     *
+ *  8 - invalid pspmt decay pixel       *
+ * 12 - ion implantation                *
+ * 16 - decay                           *
+ * 20 - unknown                         *
+ * 24 - invalid implant time            *
+ * 28 - invalid decay time              *
+ * 32 - exceeded correlation time       *
+ * 36 - implant without pin (light ion) *
+ * ==================================== *
+ * 56 - reset correlation aray          * 
+ ****************************************/
 
 Correlator::Correlator() {
   cout << "Starting correlator..." << endl;
@@ -95,12 +96,14 @@ double Correlator::Correlate(betadecay &bdecay, betadecayvariables &bdecayv,
   bool hasSega = false;
   bool hasLabr3 = false;
   bool hasClyc = false;
+  bool overflowPSPMT = false;
   // event flags
   bool isImplant = false;
   bool isDecay = false;
+  bool isLightIon = false;
   bool isSegaOnly = false;
   bool isLabr3Only = false;
-  bool isClycOnly = false; 
+  bool isClycOnly = false;
   
   // pspmt
   int implantX = -1;
@@ -142,13 +145,17 @@ double Correlator::Correlate(betadecay &bdecay, betadecayvariables &bdecayv,
   if(bdecayv.hit.pspmt == 1) hasPspmt = true; 
   if(segaMult > 0) hasSega = true;
   if(labr3Mult > 0) hasLabr3 = true;
-  if(bdecayv.hit.clyc > 0) hasClyc = true; 
+  if(bdecayv.hit.clyc > 0) hasClyc = true;
+  if(bdecay.pspmt.dyoverflow == 1) overflowPSPMT = true;
   // advanced type identification 
   if(hasPin01 && hasPspmt) {
     isImplant = true;
   }
-  if(!hasPin && hasPspmt) {
+  if(!hasPin && hasPspmt && !overflowPSPMT) {
     isDecay = true; 
+  }
+  if(!hasPin && hasPspmt && overflowPSPMT) {
+    isLightIon = true; 
   }
   //
   if(!hasPin && !hasPspmt && hasSega && !hasLabr3 && !hasClyc) {
@@ -169,14 +176,15 @@ double Correlator::Correlate(betadecay &bdecay, betadecayvariables &bdecayv,
 
   /************ PSPMT:ION-DECAY ************/
   if(hasPspmt) {
-    pspmtTime = currentTime; 
-
+    pspmtTime = currentTime;
+    
     bool goodPos = false; 
     // process different types of Pspmt events
     if(isImplant) {
       // get position info., from low gain info.
       xPos = bdecay.pspmt.aampmaxx;//(int)((bdecay.pspmt.loposxEcent50-1)*2.0 + 0.5) +1;
       yPos  = bdecay.pspmt.aampmaxy;//(int)((bdecay.pspmt.loposyEcent50-1)*2.0 + 0.5) +1;
+       
       // sanity check on position
       if(xPos < 17 && xPos > 0
 	 && yPos < 17 && yPos > 0) {
@@ -184,10 +192,12 @@ double Correlator::Correlate(betadecay &bdecay, betadecayvariables &bdecayv,
 	condition = 12; 
       }
       if(!goodPos) condition = 4;
-      else { // valid position 
+      else { // valid position
+        
 	implant[xPos][yPos].implanted = true; 
 	// check existing implant
-	double timeDiffIon = -1; 
+	double timeDiffIon = -1;
+	
 	if(implant[xPos][yPos].time >= 0) {
 	  timeDiffIon = currentTime - implant[xPos][yPos].time;
 	  if(timeDiffIon > 0) {
@@ -206,7 +216,7 @@ double Correlator::Correlate(betadecay &bdecay, betadecayvariables &bdecayv,
 	    implant[xPos][yPos].dt = timeDiffIon;
 	    //
 	    implant[xPos][yPos].numcorr = 0;
-
+	    
 	    // ions
 	    bdecay.corr.dtimplant = implant[xPos][yPos].dt;
 	    bdecay.corr.itime = implant[xPos][yPos].time;
@@ -218,12 +228,11 @@ double Correlator::Correlate(betadecay &bdecay, betadecayvariables &bdecayv,
 	    bdecay.corr.itof  = implant[xPos][yPos].tof;
 	    bdecay.corr.iasum = implant[xPos][yPos].asum;
 	    bdecay.corr.idyecal = implant[xPos][yPos].dyecal;
-
 	    
 	  } else condition = 24; // bad implant time; 
 	} else timeDiffIon = -1; 
       } // end:if(goodPos)
-    } else if(isDecay) {
+    }else if(isDecay) {
       // get position info., from high gain info.
       xPos = bdecay.pspmt.aampmaxx;//(int)((bdecay.pspmt.posxEcent-1)*2.0 + 0.5)+1;
       yPos  = bdecay.pspmt.aampmaxy;//(int)((bdecay.pspmt.posyEcent-1)*2.0 + 0.5)+1;

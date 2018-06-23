@@ -223,6 +223,8 @@ void analyze_event(int crateid, int slotid, int channum, vector<UShort_t> trace,
   int mod_freq[20] = {500,500,250,100,250,250,250,250,250,500,500,500,500,500,500,250,250,250,250,250};
   //scaling factors for differences in bit depth between the modules
   double scale_fact[20] = {0.25,0.0625,0.25,1,0.25,0.25,0.25,0.0625,0.0625,0.25,0.25,0.25,0.25,0.25,0.25,0.0625,0.0625,0.25,0.25,0.25};
+  //use this for the max amplitude to use when determining overflows
+  int maxsize[20]={16380,4090,16380,4090,16380,16380,16380,65530,65530,16380,16380,16380,16380,16380,16380,65530,65530,16380,16380,16380};
   
   //Make the Utilities Function
   int retval=0;
@@ -266,7 +268,7 @@ void analyze_event(int crateid, int slotid, int channum, vector<UShort_t> trace,
     area = utils->GetTraceArea();
     areacal = area * scale_fact[modnum];
     
-    utils->CheckOverflowUnderflow(trace,5,16000);  //cheating, 16 modules are running with low amplitude sinals so all should be fairly small
+    utils->CheckOverflowUnderflow(trace,5,maxsize[modnum]);  //cheating, 16 modules are running with low amplitude sinals so all should be fairly small
     overflow = utils->GetOverflow();
   }
 
