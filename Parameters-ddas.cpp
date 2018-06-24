@@ -286,26 +286,32 @@ void bdecayTac::Reset()
   pin01i2nE = -1;
   pin01i2nA = -1;
   pin01i2nT = 0;
+  pin01i2nTDC = 0;
 
   pin01i2sE = -1;
   pin01i2sA = -1;
   pin01i2sT = 0;
-
+  pin01i2sTDC = 0;
+  
   pin02i2nE = -1;
   pin02i2nA = -1;
   pin02i2nT = 0;
+  pin02i2nTDC = 0;
 
   pin02i2sE = -1;
   pin02i2sA = -1;
   pin02i2sT = 0;
+  pin02i2sTDC = 0;
 
   i2ni2sE = -1;
   i2ni2sA = -1;
   i2ni2sT = 0;
+  i2ni2sTDC = 0;
 
   pin01rfE = -1;
   pin01rfA = -1;
   pin01rfT = 0;
+  pin01rfTDC = 0;
 
   i2pos = -1;
   i2ncorr = -1;
@@ -522,6 +528,8 @@ void bdecayCLYC::Reset()
   //add in parameters that output the CFD filter time + trigger point
   memset(timecfd_filt,0,17*sizeof(double));
   memset(cfdtrigpt_filt,0,17*sizeof(double));
+  memset(clyc_sum1,0,17*sizeof(double));
+  memset(clyc_sum2,0,17*sizeof(double));
   
 }
 
@@ -544,6 +552,7 @@ void bdecayPSPMT::Reset()
   memset(atime,0,258*sizeof(double));
   memset(aoverflow,0,258*sizeof(double));
   memset(atdiff,0,258*sizeof(double));
+  memset(aeventtdc,0,258*sizeof(double));
 
   memset(aamp,0,258*sizeof(double));
   memset(aampcal,0,258*sizeof(double));
@@ -578,6 +587,7 @@ void bdecayPSPMT::Reset()
   dyoverflow = -1;
   dytime = 0;
   dytdiff = 0;
+  dyeventtdc = -1;
 
   testsig = -1;
   testamp = -1;

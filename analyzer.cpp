@@ -148,10 +148,10 @@ void SetInitialPixie16Utilities(Pixie16Utilities *myUtils/*, vector<UShort_t> tr
   //  cout << "Fail CalculateEnergyFilter() err = " << err << endl;
   //}
   //tau info, which also sets the crucial filter parameters r1, b1
-  err = myUtils->SetTau(tau_val);
-  if(err != 0) {
-    cout<<"Fail SetTau() err = "<<err<<endl;
-  }
+  // err = myUtils->SetTau(tau_val);
+  // if(err != 0) {
+  //   cout<<"Fail SetTau() err = "<<err<<endl;
+  // }
   
   //cout << "Set Initial Pixie16Utilities" << endl;  
   
@@ -307,6 +307,7 @@ void analyze_event(int crateid, int slotid, int channum, vector<UShort_t> trace,
     bdecay->pspmt.dyampcal = amplitudecal;
     bdecay->pspmt.dyarea = area;
     bdecay->pspmt.dyareacal = areacal;
+    bdecay->pspmt.dyeventtdc = (currenttime - starttime) + 3000.;
 
     /*    
     //Double pulse stuff
@@ -553,7 +554,15 @@ void analyze_event(int crateid, int slotid, int channum, vector<UShort_t> trace,
     bdecay->clyc.ampcal[detnum] = amplitudecal;
     bdecay->clyc.area[detnum] = area;
     bdecay->clyc.areacal[detnum] = areacal;
-    
+
+    //first sum
+    for(int i=200;i<=245;i++){
+      bdecay->clyc.clyc_sum1[detnum] = bdecay->clyc.clyc_sum1[detnum] + trace[i];
+    }
+    //second sum
+    for(int i=246;i<=400;i++){
+      bdecay->clyc.clyc_sum2[detnum] = bdecay->clyc.clyc_sum2[detnum] + trace[i];
+    }
   }
 
   //I2N input into PIXIE
@@ -654,6 +663,7 @@ void analyze_event(int crateid, int slotid, int channum, vector<UShort_t> trace,
     bdecay->tac.i2ncorr = bdecay->tac.pin01i2nE;// + bdecay->tac.i2pos*0.9;
 
     bdecay->tac.pin01i2nA = amplitude;
+    bdecay->tac.pin01i2nTDC = (currenttime - starttime) + 3000.;
   }
 
   // TAC2 : Pin01 - I2sTOF TAC
@@ -666,6 +676,7 @@ void analyze_event(int crateid, int slotid, int channum, vector<UShort_t> trace,
     bdecay->tac.i2scorr = bdecay->tac.pin01i2sE;// + bdecay->tac.i2pos*0.9;
 
     bdecay->tac.pin01i2sA = amplitude;
+    bdecay->tac.pin01i2sTDC = (currenttime - starttime) + 3000.;
   }
 
   // TAC3 : Pin02 - I2nTOF
@@ -677,6 +688,7 @@ void analyze_event(int crateid, int slotid, int channum, vector<UShort_t> trace,
     bdecay->tac.pin02i2nT = (currenttime - starttime) + 3000.;
 
     bdecay->tac.pin02i2nT = amplitude;
+    bdecay->tac.pin02i2nTDC = (currenttime - starttime) + 3000.;
   }
 
   // TAC4 : Pin02 - I2sTOF TAC
@@ -688,6 +700,7 @@ void analyze_event(int crateid, int slotid, int channum, vector<UShort_t> trace,
     bdecay->tac.pin02i2sT = (currenttime - starttime) + 3000.;
 
     bdecay->tac.pin02i2sA = amplitude;
+    bdecay->tac.pin02i2sTDC = (currenttime - starttime) + 3000.;
   }
 
   // TAC5 : I2N - I2S
@@ -698,7 +711,8 @@ void analyze_event(int crateid, int slotid, int channum, vector<UShort_t> trace,
     //  currenttime = bdecay->time[adcnumber].timelow[channum] + bdecay->time[adcnumber].timehigh[channum] * 4294967296.;
     bdecay->tac.i2ni2sT = (currenttime - starttime) + 3000.;
 
-    bdecay->tac.i2ni2sT = amplitude;
+    bdecay->tac.i2ni2sA = amplitude;
+    bdecay->tac.i2ni2sTDC = (currenttime - starttime) + 3000.;
   }
 
   // TAC6 : Pin01 - RF 
@@ -710,6 +724,7 @@ void analyze_event(int crateid, int slotid, int channum, vector<UShort_t> trace,
     bdecay->tac.pin01rfT = (currenttime - starttime) + 3000.;
 
     bdecay->tac.pin01rfT = amplitude;
+    bdecay->tac.pin01rfTDC = (currenttime - starttime) + 3000.;
   }
   
 
@@ -799,12 +814,14 @@ void analyze_event(int crateid, int slotid, int channum, vector<UShort_t> trace,
 
     if(bdecay->adc[adcnumber].channel[channum] > bdecay->pspmt.aenergy[pix]){
       bdecay->pspmt.aenergy[pix] = bdecay->adc[adcnumber].channel[channum];
+      bdecay->pspmt.aeventtdc[pix] = (currenttime - starttime) + 3000.;
+      bdecay->pspmt.aecal[pix] = bdecay->pspmt.aenergy[pix];
     }
     //cout << bdecay->adc[adcnumber].channel[channum] << " " << bdecay->pspmt.aenergy[pix] << endl;
     //bdecay->pspmt.aenergy[pix] = bdecay->adc[adcnumber].channel[channum];
     //cout<<"pix: "<<pix<<" pspmt.aenergy: "<<bdecay->pspmt.aenergy[pix];
     
-    bdecay->pspmt.aecal[pix] = bdecay->pspmt.aenergy[pix];
+    
     bdecay->pspmt.atime[pix] = bdecay->time[adcnumber].timefull[channum];
     bdecay->pspmt.asum += bdecay->pspmt.aecal[pix];
     bdecay->pspmt.pixmult[pix] = bdecay->pspmt.pixmult[pix] + 1;

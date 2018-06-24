@@ -81,26 +81,32 @@ class bdecayTac: public TObject
   int pin01i2nE = -1;
   int pin01i2nA = -1;
   int pin01i2nT = 0;
+  double pin01i2nTDC = 0;
   
   int pin01i2sE = -1;
   int pin01i2sA = -1;
   int pin01i2sT = 0;
+  double pin01i2sTDC = 0;
   
   int pin02i2nE = -1;
   int pin02i2nA = -1;
   int pin02i2nT = 0;
+  double pin02i2nTDC = 0;
 
   int pin02i2sE = -1;
   int pin02i2sA = -1;
   int pin02i2sT = 0;
+  double pin02i2sTDC = 0;
 
   int i2ni2sE = -1;
   int i2ni2sA = -1;
   int i2ni2sT = 0;
+  double i2ni2sTDC = 0;
 
   int pin01rfE = -1;
   int pin01rfA = -1;
   int pin01rfT = 0;
+  double pin01rfTDC = 0;
 
   int i2pos = -1;
   int i2ncorr = -1;
@@ -376,6 +382,8 @@ class bdecayPSPMT: public TObject
   int dyoverflow;
   double dytime;
   double dytdiff;  //time difference between dynode and anode with highest amplitude
+  double dyeventtdc;
+  
   //double pulse
   double dyE1_double;
   double dyT1_double;
@@ -462,6 +470,7 @@ class bdecayPSPMT: public TObject
   double lowpoint[258];
   double baseline[258];
   double ratio[258];
+  double aeventtdc[258];
 
   int pixmult[258];
   
@@ -619,6 +628,9 @@ class bdecayCLYC: public TObject
   double ampcal[17];
   double area[17];
   double areacal[17];
+
+  int clyc_sum1[17];
+  int clyc_sum2[17];
   
 
   int mult;
