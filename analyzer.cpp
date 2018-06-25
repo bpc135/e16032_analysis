@@ -550,6 +550,8 @@ void analyze_event(int crateid, int slotid, int channum, vector<UShort_t> trace,
   //Clyc
   if(id >= 32 && id<48) {
     int detnum = (id-32)+1;
+
+    cout << "clyc found " << id << " " << detnum << endl;
     
     //Register energy
     bdecay->clyc.energy[detnum] = (bdecay->adc[adcnumber].channel[channum]) + (random3->Rndm());    
