@@ -47,6 +47,7 @@ ClassImp(betadecay);
 ClassImp(rootdataout);
 ClassImp(bdecayPSPMT);
 ClassImp(bdecayI2);
+ClassImp(bdecayCLYC);
 //#endif
 
 betadecay::betadecay()
@@ -625,10 +626,10 @@ void bdecayPSPMT::Reset()
   amaxy = 0;
   amaxtime = 0;
   aoverflowcount = 0;
-  posxEcent = 0;
-  posyEcent = 0;
-  posxEcent50 = 0;
-  posyEcent50 = 0;
+  posxEcent = -1;
+  posyEcent = -1;
+  posxEcent50 = -1;
+  posyEcent50 = -1;
   amaxcent = 0;
   asumcent = -1;
   asumcent50 = -1;
@@ -641,10 +642,10 @@ void bdecayPSPMT::Reset()
   aampmaxcentcal = -1;
   aampsumcent = -1;
   aampsumcent50 = -1;
-  aampmax = 0;
-  aampmaxcal = 0;
-  aampmaxx = 0;
-  aampmaxy = 0;
+  aampmax = -1;
+  aampmaxcal = -1;
+  aampmaxx = -1;
+  aampmaxy = -1;
   
   posxareacent = -1;
   posyareacent = -1;

@@ -14,6 +14,8 @@
 
 #include "correlator.h"
 
+#define CORRELATION 3
+
 /****************************************
  * Correlation flags:                   *
  * ==================================== *
@@ -85,6 +87,8 @@ double Correlator::Correlate(betadecay &bdecay, betadecayvariables &bdecayv,
     bdecayv.corr.reset = 0; 
   }
 
+  bool implanted = false;
+  
   // get time
   double currentTime = 0;
   currentTime = (bdecay.clock.initial)/1.e6;  //time in ms 
@@ -146,7 +150,7 @@ double Correlator::Correlate(betadecay &bdecay, betadecayvariables &bdecayv,
   if(segaMult > 0) hasSega = true;
   if(labr3Mult > 0) hasLabr3 = true;
   if(bdecayv.hit.clyc > 0) hasClyc = true;
-  if(bdecay.pspmt.dyoverflow == 1) overflowPSPMT = true;
+  if(bdecay.pspmt.dyoverflow == 1) overflowPSPMT = true; 
   // advanced type identification 
   if(hasPin01 && hasPspmt) {
     isImplant = true;
@@ -182,8 +186,12 @@ double Correlator::Correlate(betadecay &bdecay, betadecayvariables &bdecayv,
     // process different types of Pspmt events
     if(isImplant) {
       // get position info., from low gain info.
-      xPos = bdecay.pspmt.aampmaxx;//(int)((bdecay.pspmt.loposxEcent50-1)*2.0 + 0.5) +1;
-      yPos  = bdecay.pspmt.aampmaxy;//(int)((bdecay.pspmt.loposyEcent50-1)*2.0 + 0.5) +1;
+      // xPos = bdecay.pspmt.aampmaxx;//(int)((bdecay.pspmt.loposxEcent50-1)*2.0 + 0.5) +1;
+      // yPos  = bdecay.pspmt.aampmaxy;//(int)((bdecay.pspmt.loposyEcent50-1)*2.0 + 0.5) +1;
+
+      xPos = bdecay.pspmt.posxampcent50;//(int)((bdecay.pspmt.loposxEcent50-1)*2.0 + 0.5) +1;
+      yPos  = bdecay.pspmt.posyampcent50;//(int)((bdecay.pspmt.loposyEcent50-1)*2.0 + 0.5) +1;
+      
        
       // sanity check on position
       if(xPos < 17 && xPos > 0
@@ -203,7 +211,7 @@ double Correlator::Correlate(betadecay &bdecay, betadecayvariables &bdecayv,
 	  if(timeDiffIon > 0) {
 	    // assign values 
 	    implant[xPos][yPos].time = currentTime;
-	    implant[xPos][yPos].tof = bdecay.pid.i2ntof;
+	    implant[xPos][yPos].tof = bdecay.pid.i2stof;
 	    // anode and dynode
 	    implant[xPos][yPos].dyecal = bdecay.pspmt.dyecal;
 	    implant[xPos][yPos].asum = bdecay.pspmt.asum; 
@@ -236,6 +244,68 @@ double Correlator::Correlate(betadecay &bdecay, betadecayvariables &bdecayv,
       // get position info., from high gain info.
       xPos = bdecay.pspmt.aampmaxx;//(int)((bdecay.pspmt.posxEcent-1)*2.0 + 0.5)+1;
       yPos  = bdecay.pspmt.aampmaxy;//(int)((bdecay.pspmt.posyEcent-1)*2.0 + 0.5)+1;
+
+      //search around position for correlation
+      double decay_pixel[CORRELATION][CORRELATION];
+      double decay_pixel_pick = 100000000000000.0;
+      
+      // reset the temporary array with very large times
+      for (int i=0; i<CORRELATION; i++) {
+	for (int j=0; j<CORRELATION; j++) {
+	  decay_pixel[i][j] = 1000000000000000.0;
+	}
+      }
+      
+      int corr_limit = (CORRELATION - 1)/2;   // for CORRELATION=3, corr_limt=1
+      int num_corr = 0; 
+      
+      for (int i=(-corr_limit); i<(corr_limit+1); i++) {
+	for (int j=(-corr_limit); j<(corr_limit+1); j++) {
+	  if (((xPos) >= 0) && ((xPos) <= 17)
+	      && ((yPos) >= 0) && ((yPos) <= 17)) { // Valid pixel? 
+	    
+	    if (implant[xPos+i][yPos+j].implanted) {
+	      decay_pixel[i+corr_limit][j+corr_limit] =currentTime-implant[xPos+i][yPos+j].time;
+	      implanted = true;
+	      num_corr++;
+	    }
+	    
+	  }
+	}
+      }
+      
+      int tempxpos = 500;
+      int tempypos = 500;
+      
+      
+      if (implanted) {
+	for (int i=(-corr_limit); i<(corr_limit+1); i++) {
+	  for (int j=(-corr_limit); j<(corr_limit+1); j++) {
+	    if (((xPos+i) >= 0) && ((xPos+i) <= 17)
+		&& ((yPos+j) >= 0) && ((yPos+j) <= 17)) { // was giving invalid pixels, so we'll try adding this condition here too
+	      
+	      if (decay_pixel[i+corr_limit][j+corr_limit] < decay_pixel_pick) {
+		decay_pixel_pick = decay_pixel[i+corr_limit][j+corr_limit];
+		tempxpos = xPos+i;
+		tempypos = yPos+j;
+		
+		//cout << "back: " << back << " front: " << front << endl;
+		
+	      }
+	      
+	    }
+	  }
+	}
+      }
+	
+      bdecay.corr.mult = (long)num_corr;
+      
+      num_corr = 0;
+      
+      xPos = tempxpos;
+      yPos = tempypos;
+      
+      
       // sanity check on position
       if(xPos < 17 && xPos > 0
 	 && yPos < 17 && yPos > 0) {
@@ -245,7 +315,7 @@ double Correlator::Correlate(betadecay &bdecay, betadecayvariables &bdecayv,
       if(!goodPos) condition = 8;
       else { // valid decay position 
 	// condition for time interval
-	const double tDiffCorrCut = 200; // correlation time in ms
+	const double tDiffCorrCut = 100; // correlation time in ms
 	double ionDecayTDiff = currentTime - implant[xPos][yPos].time;;
 	if(ionDecayTDiff < 0) condition = 28;
 	else if(ionDecayTDiff < tDiffCorrCut/*decay[xPos][yPos].time < tDiffCorrCut*/) { // decay found and correlated 

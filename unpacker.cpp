@@ -135,7 +135,7 @@ int unpack_data(TTree *tree_in, TTree *tree_out, string Run_Number ) {
 
   //RawHits
   DDASRootFitEvent *rawhits;
-  // nevents = 100;
+  // nevents = 1000;
 
   //Loop over all the events in the file
   for (Int_t ii=0; ii<nevents; ii++) {
@@ -143,7 +143,7 @@ int unpack_data(TTree *tree_in, TTree *tree_out, string Run_Number ) {
     // //Progress bar
     if( (ii % oneper) == 0) {
       cout << "Events processed " << ii << " - percent done " << (int)(ii/oneper)*1 << "%"<<endl;
-      }
+    }
     // if( (ii % tenthper) == 0) {
     //cout << "Events processed " << ii << " - percent done " << (int)(ii/tenthper)*0.1 << "%"<<endl;
     //}
@@ -205,7 +205,7 @@ int unpack_data(TTree *tree_in, TTree *tree_out, string Run_Number ) {
     
     //Fill with results of analysis
     // if(bdecay.pspmt.dyenergy>0 || bdecay.segatotal.mult>0 || bdecay.labr3.mult>0) {
-    if(bdecay.pspmt.dyenergy>0 || bdecay.pspmt.amult > 0) {
+    if( (bdecay.pspmt.dyamp>0 && bdecay.pspmt.amult > 0) || bdecay.labr3.mult > 0) {
       
       rootout->SetOutputValues(bdecay);
       rootout->clock = bdecay.clock;
@@ -219,6 +219,7 @@ int unpack_data(TTree *tree_in, TTree *tree_out, string Run_Number ) {
       rootout->sega = bdecay.sega;
       rootout->ddasdiagnostics = bdecay.ddasdiagnostics;
       rootout->labr3 = bdecay.labr3;
+      rootout->clyc = bdecay.clyc;
       rootout->i2 = bdecay.i2;
       rootout->pspmt = bdecay.pspmt;
       
@@ -226,6 +227,17 @@ int unpack_data(TTree *tree_in, TTree *tree_out, string Run_Number ) {
       tree_out->Fill();
       //}
     }
+
+    /*
+    if(bdecay.pspmt.dyenergy>10 && bdecay.pspmt.dyenergy < 64000) {
+      cout<<"Event: "<<ii<<endl;
+      cout<<"Energies: "<<bdecay.pspmt.posxEcent<<"  "<<bdecay.pspmt.posyEcent<<endl;
+      cout<<"Amps: "<<bdecay.pspmt.posxampcent<<"  "<<bdecay.pspmt.posyampcent<<endl;
+      cout<<"Amps50: "<<bdecay.pspmt.posxampcent50<<"  "<<bdecay.pspmt.posyampcent50<<endl;
+      cout<<"Amp Max: "<<bdecay.pspmt.aampmaxcentcal<<endl;
+    }
+    */
+    
     
   } /* for (int i=0; i < nevents; i++) */
    
@@ -367,7 +379,7 @@ int unpack_event(int eventnum, betadecay *bdecay, betadecayvariables *bdecayv,ve
   //Determine Decay Multiplicity
   int multdecay = 0;
   
-  for(int eye=1; eye<258; eye++){
+  for(int eye=1; eye<257; eye++){
     if(bdecay->pspmt.aamp[eye] > 0 ) {
       multdecay++;
     }
@@ -382,41 +394,46 @@ int unpack_event(int eventnum, betadecay *bdecay, betadecayvariables *bdecayv,ve
   //first determine maxima within the intended thresholds for the centroid determinations
   for(int i=1; i<257; i++){
 
-    if(bdecay->pspmt.aamp[i] > 0 && bdecay->pspmt.dytime > 0){
-      bdecay->pspmt.atdiff[i] = bdecay->pspmt.dytime - bdecay->pspmt.atime[i];
-    }
-      
-    //pixie energies
-    if(bdecay->pspmt.aecal[i] > 0 && bdecay->pspmt.aecal[i] < 100000 ){
+    if(bdecay->pspmt.dyenergy > 10 && bdecay->pspmt.aecal[i]>0 && bdecay->pspmt.aecal[i] < 30000){
 
-      if(bdecay->pspmt.dyecal>0) bdecayv->hit.pspmt = 1;
-      if(bdecay->pspmt.aecal[i] > amaxcent){
-	amaxcent = bdecay->pspmt.aecal[i];
-      }
 
-    }
-    
-    //amplitudes
-    if(bdecay->pspmt.aamp[i] > 0) {
-
-      if(bdecay->pspmt.aampcal[i] > aampmaxcentcal){
-	aampmaxcentcal = bdecay->pspmt.aampcal[i];
-      }
-      if(bdecay->pspmt.aamp[i] > aampmaxcent){
-	aampmaxcent = bdecay->pspmt.aamp[i];
+      if(bdecay->pspmt.aamp[i] > 0 && bdecay->pspmt.dytime > 0){
+	bdecay->pspmt.atdiff[i] = bdecay->pspmt.dytime - bdecay->pspmt.atime[i];
       }
       
-    }
-    
-    //areas
-    if(bdecay->pspmt.aarea[i] > 0){
-      if(bdecay->pspmt.aareacal[i] > aareamaxcentcal){
-	aareamaxcentcal = bdecay->pspmt.aareacal[i];
-      }
-      if(bdecay->pspmt.aarea[i] > aareamaxcent){
-	aareamaxcent = bdecay->pspmt.aarea[i];
-      }
+      //pixie energies
+      if(bdecay->pspmt.aecal[i] > 0 && bdecay->pspmt.aecal[i] < 100000 ){
 
+	if(bdecay->pspmt.dyecal>0) bdecayv->hit.pspmt = 1;
+	if(bdecay->pspmt.aecal[i] > amaxcent){
+	  amaxcent = bdecay->pspmt.aecal[i];
+	  bdecay->pspmt.asum += bdecay->pspmt.aecal[i];
+	}
+
+      }
+    
+      //amplitudes
+      if(bdecay->pspmt.aamp[i] > 0) {
+
+	if(bdecay->pspmt.aampcal[i] > aampmaxcentcal){
+	  aampmaxcentcal = bdecay->pspmt.aampcal[i];
+	}
+	if(bdecay->pspmt.aamp[i] > aampmaxcent){
+	  aampmaxcent = bdecay->pspmt.aamp[i];
+	}
+      
+      }
+    
+      //areas
+      if(bdecay->pspmt.aarea[i] > 0){
+	if(bdecay->pspmt.aareacal[i] > aareamaxcentcal){
+	  aareamaxcentcal = bdecay->pspmt.aareacal[i];
+	}
+	if(bdecay->pspmt.aarea[i] > aareamaxcent){
+	  aareamaxcent = bdecay->pspmt.aarea[i];
+	}
+
+      }
     }
 
   }
@@ -427,7 +444,7 @@ int unpack_event(int eventnum, betadecay *bdecay, betadecayvariables *bdecayv,ve
 
   bdecay->pspmt.amaxcent = amaxcent;
   bdecay->pspmt.aampmaxcent = aampmaxcent;
-  bdecay->pspmt.aampmaxcentcal = aareamaxcentcal;
+  bdecay->pspmt.aampmaxcentcal = aampmaxcentcal;
   bdecay->pspmt.aareamaxcent = aareamaxcent;
   bdecay->pspmt.aareamaxcentcal = aareamaxcentcal;
 
@@ -438,8 +455,16 @@ int unpack_event(int eventnum, betadecay *bdecay, betadecayvariables *bdecayv,ve
     int xpix = (int)((i-1) % 16);
     int ypix = (int)((i-1) / 16);
 
-    if(bdecay->pspmt.aecal[i] > 0 && bdecay->pspmt.aecal[i] < 100000 && bdecay->pspmt.atdiff[i] < 1500){
-     
+
+    // if(bdecay->pspmt.aampcal[i] > 0 && bdecay->pspmt.aampcal[i] < 100000 && TMath::Abs(bdecay->pspmt.atdiff[i]) < 50){
+
+    // if(bdecay->pspmt.aampcal[i] > 0 && bdecay->pspmt.aampcal[i] < 100000){
+
+    if(bdecay->pspmt.dyenergy > 10 && bdecay->pspmt.aecal[i]>0 && bdecay->pspmt.aecal[i] < 30000){
+
+
+      // cout<<"Eventnum: "<<eventnum<<"  i: "<<i<<" \ty: "<<ypix<<" \tx: "<<xpix<<" \tE: "<<bdecay->pspmt.aecal[i]<<"\t A: "<<bdecay->pspmt.aampcal[i]<<endl;    
+      
       //pixieEcent
       bdecay->pspmt.posxEcent += xpix * bdecay->pspmt.aecal[i];
       bdecay->pspmt.posyEcent += ypix * bdecay->pspmt.aecal[i];
@@ -452,12 +477,12 @@ int unpack_event(int eventnum, betadecay *bdecay, betadecayvariables *bdecayv,ve
 	asumcent50 += bdecay->pspmt.aecal[i];
       }
 
+      
       //pixie amplitudes cent
       bdecay->pspmt.posxampcent += xpix * bdecay->pspmt.aampcal[i];
       bdecay->pspmt.posyampcent += ypix * bdecay->pspmt.aampcal[i];
       aampsumcent += bdecay->pspmt.aampcal[i];
       
-
       //calculate the centroids using 50% of maximum anode values
       if(bdecay->pspmt.aampcal[i] > (0.5 * bdecay->pspmt.aampmaxcentcal)){
 	
@@ -517,8 +542,7 @@ int unpack_event(int eventnum, betadecay *bdecay, betadecayvariables *bdecayv,ve
   bdecay->pspmt.posxareacent50 = bdecay->pspmt.posxareacent50 / aareasumcent50;
   bdecay->pspmt.posyareacent50 = bdecay->pspmt.posyareacent50 / aareasumcent50;
 
-  //cout<<bdecay->pspmt.posxEcent<<"  "<<bdecay->pspmt.posyEcent<<endl;
-  
+
   //Only fill this stuff for the low ("lo") gain things
   if ((bdecayv->hit.pin01 == 1) && bdecay->pspmt.dyamp > 0) {
     

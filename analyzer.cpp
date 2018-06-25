@@ -42,7 +42,7 @@ void SetInitialPixie16Utilities(Pixie16Utilities *myUtils/*, vector<UShort_t> tr
     energy_gap = 60;            
     energy_range = 1;           
   }else if(adcfreq == 500){ //anode 500
-    trace_delay = 120;          
+    trace_delay = 80;          
     trigfilt_gap = 0;           
     trigfilt_range = 0;         
     trigfilt_length = 100;      
@@ -57,7 +57,7 @@ void SetInitialPixie16Utilities(Pixie16Utilities *myUtils/*, vector<UShort_t> tr
     energy_gap = 160;            
     energy_range = 1;
   }else{//250
-    trace_delay = 120;          
+    trace_delay = 80;          
     trigfilt_gap = 0;           
     trigfilt_range = 0;         
     trigfilt_length = 100;      
@@ -221,8 +221,18 @@ void analyze_event(int crateid, int slotid, int channum, vector<UShort_t> trace,
   //4 = 500-14 (500 MSPS, 14 bit)
   int mod_type[20] = {4,3,1,0,1,1,1,2,2,4,4,4,4,4,4,2,2,1,1,1};
   int mod_freq[20] = {500,500,250,100,250,250,250,250,250,500,500,500,500,500,500,250,250,250,250,250};
+
+  
+  //  THIS NEEDS TO BE THE REAL ONE FOR THE DATA!!!!!!!!!!!!!!!!!!
   //scaling factors for differences in bit depth between the modules
   double scale_fact[20] = {0.25,0.0625,0.25,1,0.25,0.25,0.25,0.0625,0.0625,0.25,0.25,0.25,0.25,0.25,0.25,0.0625,0.0625,0.25,0.25,0.25};
+  
+  /*
+  //THIS IS THE ONE FOR THE TEST DATA
+  //scaling factors for differences in bit depth between the modules
+  double scale_fact[20] = {1,1,1,1,0.25,0.25,0.25,0.0625,0.0625,0.25,0.25,0.25,0.25,0.25,0.0625,0.0625,0.25,0.25,0.25,1.};
+  */
+  
   //use this for the max amplitude to use when determining overflows
   int maxsize[20]={16380,4090,16380,4090,16380,16380,16380,65530,65530,16380,16380,16380,16380,16380,16380,65530,65530,16380,16380,16380};
   
@@ -248,8 +258,18 @@ void analyze_event(int crateid, int slotid, int channum, vector<UShort_t> trace,
   int lo, high, loarea, hiarea, offset;
   //bounds for baseline determination
   if(trace.size() > 0){
-    lo = 0;
-    high = int(utils->GetTraceDelay() / (int(1000./ModMSPS)));
+    //  lo = 0;
+    //  high = int(utils->GetTraceDelay() / (int(1000./ModMSPS)));
+
+    if(modnum==0){
+      lo = 0;
+      high =Int_t ( 150. / (Int_t(1000./ModMSPS)));
+    }
+    else{
+      lo = 0;
+      high = Int_t (40. / (Int_t(1000./ModMSPS)));
+    }
+    
     //calculate trace properties
     utils->CalculateBaseline_PR(trace,lo,high);
     baseline = utils->GetBaseline();
@@ -257,7 +277,9 @@ void analyze_event(int crateid, int slotid, int channum, vector<UShort_t> trace,
     amplitude = utils->GetTraceAmplitude();
     //modify amplitude for differences in bit depth
     // cout << amplitude << " before scale, modnum = " << modnum << ", scale_fact = " << scale_fact[modnum] << endl;
-    amplitudecal = amplitude * scale_fact[modnum] + random3->Rndm();
+    //amplitudecal = amplitude * scale_fact[modnum] + random3->Rndm();
+    amplitudecal = amplitude * scale_fact[modnum];
+
     // cout << amplitudecal << " after scale"<<endl;
     //get trace areas
     loarea = int (utils->GetTraceDelay() / (int(1000./ModMSPS)));
@@ -286,9 +308,18 @@ void analyze_event(int crateid, int slotid, int channum, vector<UShort_t> trace,
 
     //set initial dynode parameters
     //check if we have already set it
-    if(bdecay->adc[adcnumber].channel[channum] > bdecay->pspmt.dyenergy){
+    if(amplitude > bdecay->pspmt.dyamp){
       bdecay->pspmt.dyenergy = bdecay->adc[adcnumber].channel[channum]; //Pixie energy
       bdecay->pspmt.dyecal = bdecay->adc[adcnumber].channel[channum] + random3->Rndm();
+
+      bdecay->pspmt.dytime = bdecay->time[adcnumber].timefull[channum]; //time
+
+      bdecay->pspmt.dyamp = amplitude;
+      bdecay->pspmt.dyampcal = amplitudecal;
+      bdecay->pspmt.dyarea = area;
+      bdecay->pspmt.dyareacal = areacal;
+      bdecay->pspmt.dyeventtdc = (currenttime - starttime) + 3000.;
+      
     }
 
     //  cout<<endl<<"Dynode: "<<bdecay->pspmt.dyenergy<<endl<<endl;
@@ -301,13 +332,7 @@ void analyze_event(int crateid, int slotid, int channum, vector<UShort_t> trace,
       
     }
     
-    bdecay->pspmt.dytime = bdecay->time[adcnumber].timefull[channum]; //time
-
-    bdecay->pspmt.dyamp = amplitude;
-    bdecay->pspmt.dyampcal = amplitudecal;
-    bdecay->pspmt.dyarea = area;
-    bdecay->pspmt.dyareacal = areacal;
-    bdecay->pspmt.dyeventtdc = (currenttime - starttime) + 3000.;
+    
 
     /*    
     //Double pulse stuff
@@ -524,7 +549,7 @@ void analyze_event(int crateid, int slotid, int channum, vector<UShort_t> trace,
 
   //Clyc
   if(id >= 32 && id<48) {
-    int detnum = id;
+    int detnum = (id-32)+1;
     
     //Register energy
     bdecay->clyc.energy[detnum] = (bdecay->adc[adcnumber].channel[channum]) + (random3->Rndm());    
@@ -768,8 +793,11 @@ void analyze_event(int crateid, int slotid, int channum, vector<UShort_t> trace,
   if( (id >= 64) && (id < 320) ){
     int pix = 0;
     int rownum = modnum - 4;
-    int xpix = channum;
-    int ypix = 15 - rownum;
+    //  int ypix = channum;
+    //  int xpix = 15 - rownum;
+    
+     int xpix = channum;
+     int ypix = 15 - rownum;
     pix = (ypix * 16) + xpix + 1;    
     
     if(pix>256) {
@@ -799,10 +827,7 @@ void analyze_event(int crateid, int slotid, int channum, vector<UShort_t> trace,
       max = max-baseline;
     }
     
-    bdecay->pspmt.aamp[pix] = amplitude;
-    bdecay->pspmt.aampcal[pix] = amplitudecal;
-    bdecay->pspmt.aarea[pix] = area;
-    bdecay->pspmt.aareacal[pix] = areacal;
+    
     bdecay->pspmt.aoverflow[pix] = overflow; //overflow
     if(overflow == 1){
       bdecay->pspmt.aoverflowcount += 1;
@@ -812,18 +837,21 @@ void analyze_event(int crateid, int slotid, int channum, vector<UShort_t> trace,
     bdecay->pspmt.ratio[pix] = (baseline-min)/max;
     bdecay->pspmt.amult += 1;
 
-    if(bdecay->adc[adcnumber].channel[channum] > bdecay->pspmt.aenergy[pix]){
+    if(amplitude > bdecay->pspmt.aamp[pix]){
       bdecay->pspmt.aenergy[pix] = bdecay->adc[adcnumber].channel[channum];
       bdecay->pspmt.aeventtdc[pix] = (currenttime - starttime) + 3000.;
       bdecay->pspmt.aecal[pix] = bdecay->pspmt.aenergy[pix];
+      bdecay->pspmt.aamp[pix] = amplitude;
+      bdecay->pspmt.aampcal[pix] = amplitudecal;
+      bdecay->pspmt.aarea[pix] = area;
+      bdecay->pspmt.aareacal[pix] = areacal;
+      bdecay->pspmt.atime[pix] = bdecay->time[adcnumber].timefull[channum];
     }
     //cout << bdecay->adc[adcnumber].channel[channum] << " " << bdecay->pspmt.aenergy[pix] << endl;
     //bdecay->pspmt.aenergy[pix] = bdecay->adc[adcnumber].channel[channum];
     //cout<<"pix: "<<pix<<" pspmt.aenergy: "<<bdecay->pspmt.aenergy[pix];
     
     
-    bdecay->pspmt.atime[pix] = bdecay->time[adcnumber].timefull[channum];
-    bdecay->pspmt.asum += bdecay->pspmt.aecal[pix];
     bdecay->pspmt.pixmult[pix] = bdecay->pspmt.pixmult[pix] + 1;
 
     //set max using scaled amplitudes so bit depth doesn't
@@ -847,11 +875,7 @@ void analyze_event(int crateid, int slotid, int channum, vector<UShort_t> trace,
       bdecay->pspmt.aareamaxy = ypix;
       bdecay->pspmt.aareamaxtime = bdecay->time[adcnumber].timefull[channum];
     }
-
     
-
-    
-
     // int anode_threshold = 30000; //for pixieE
     // if(bdecay->pspmt.aecal[i] > 0 && bdecay->pspmt.aecal[i] < anode_threshold){
     //   if(bdecay->pspmt.aecal[i] > bdecay->pspmt.amaxcent){
