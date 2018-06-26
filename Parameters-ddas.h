@@ -411,15 +411,17 @@ class bdecayPSPMT: public TObject
   
 
   //anode
-  double aenergy[258];
-  double aecal[258];
+  int ahit[257];
+  double aenergy[257];
+  double aecal[257];
   double asum;
-  double atime[258];
+  double atime[257];
   double amax;
   double amaxcal;
-  double atdiff[258];
-  int aoverflow[258];
+  double atdiff[257];
+  int aoverflow[257];
   int amult;
+  int amult_raw;
   int amaxx;
   int amaxy;
   double amaxxcal;
@@ -433,8 +435,8 @@ class bdecayPSPMT: public TObject
   double asumcent;
   double asumcent50;
   
-  double aamp[258];
-  double aampcal[258];
+  double aamp[257];
+  double aampcal[257];
   double aampsum;
   int aampmax;
   double aampmaxcal;
@@ -451,8 +453,8 @@ class bdecayPSPMT: public TObject
   double aampsumcent50;
   int aoverflowcount;
   
-  double aarea[258];
-  double aareacal[258];
+  double aarea[257];
+  double aareacal[257];
   double aareasum;
   int aareamax;
   int aareamaxx;
@@ -467,24 +469,24 @@ class bdecayPSPMT: public TObject
   double aareasumcent;
   double aareasumcent50;
   
-  double lowpoint[258];
-  double baseline[258];
-  double ratio[258];
-  double aeventtdc[258];
+  double lowpoint[257];
+  double baseline[257];
+  double ratio[257];
+  double aeventtdc[257];
 
-  int pixmult[258];
+  int pixmult[257];
   
-  double loaenergy[258];
-  double loaecal[258];
-  double loaamp[258];
-  double loaampcal[258];
+  double loaenergy[257];
+  double loaecal[257];
+  double loaamp[257];
+  double loaampcal[257];
   double loaampsum;
-  double loaarea[258];
-  double loaareacal[258];
+  double loaarea[257];
+  double loaareacal[257];
   double loaareasum;
   double loasum;
-  double loatime[258];
-  double loatdiff[258];
+  double loatime[257];
+  double loatdiff[257];
   double loamax;
   double loamaxtime;
   int loamult;
@@ -629,9 +631,10 @@ class bdecayCLYC: public TObject
   double area[17];
   double areacal[17];
 
-  int clyc_sum1[17];
-  int clyc_sum2[17];
-  
+  int shortsum[17];
+  int longsum[17];
+  int fullsum[17];
+
 
   int mult;
   double time[17];

@@ -529,9 +529,10 @@ void bdecayCLYC::Reset()
   //add in parameters that output the CFD filter time + trigger point
   memset(timecfd_filt,0,17*sizeof(double));
   memset(cfdtrigpt_filt,0,17*sizeof(double));
-  memset(clyc_sum1,0,17*sizeof(double));
-  memset(clyc_sum2,0,17*sizeof(double));
-  
+  memset(shortsum,0,17*sizeof(double));
+  memset(longsum,0,17*sizeof(double));
+  memset(fullsum,0,17*sizeof(double));
+
 }
 
 void bdecayCLYCTotal::Reset()
@@ -548,34 +549,35 @@ void bdecayCLYCTotal::Reset()
 void bdecayPSPMT::Reset()
 {
 
-  memset(aenergy,0,258*sizeof(double));
-  memset(aecal,0,258*sizeof(double));
-  memset(atime,0,258*sizeof(double));
-  memset(aoverflow,0,258*sizeof(double));
-  memset(atdiff,0,258*sizeof(double));
-  memset(aeventtdc,0,258*sizeof(double));
+  memset(ahit,0,257*sizeof(int));
+  memset(aenergy,0,257*sizeof(double));
+  memset(aecal,0,257*sizeof(double));
+  memset(atime,0,257*sizeof(double));
+  memset(aoverflow,0,257*sizeof(double));
+  memset(atdiff,0,257*sizeof(double));
+  memset(aeventtdc,0,257*sizeof(double));
 
-  memset(aamp,0,258*sizeof(double));
-  memset(aampcal,0,258*sizeof(double));
+  memset(aamp,0,257*sizeof(double));
+  memset(aampcal,0,257*sizeof(double));
   
-  memset(aarea,0,258*sizeof(double));
-  memset(aareacal,0,258*sizeof(double));
+  memset(aarea,0,257*sizeof(double));
+  memset(aareacal,0,257*sizeof(double));
   
-  memset(lowpoint,0,258*sizeof(double));
-  memset(baseline,0,258*sizeof(double));
-  memset(ratio,0,258*sizeof(double));
+  memset(lowpoint,0,257*sizeof(double));
+  memset(baseline,0,257*sizeof(double));
+  memset(ratio,0,257*sizeof(double));
   
-  memset(pixmult,0,258*sizeof(int));
+  memset(pixmult,0,257*sizeof(int));
   
-  memset(loaenergy,0,258*sizeof(double));
-  memset(loaecal,0,258*sizeof(double));
-  memset(loaamp,0,258*sizeof(double));
-  memset(loaampcal,0,258*sizeof(double));
-  memset(loaarea,0,258*sizeof(double));
-  memset(loaareacal,0,258*sizeof(double));
+  memset(loaenergy,0,257*sizeof(double));
+  memset(loaecal,0,257*sizeof(double));
+  memset(loaamp,0,257*sizeof(double));
+  memset(loaampcal,0,257*sizeof(double));
+  memset(loaarea,0,257*sizeof(double));
+  memset(loaareacal,0,257*sizeof(double));
   
-  memset(loatime,0,258*sizeof(double));
-  memset(loatdiff,0,258*sizeof(double));
+  memset(loatime,0,257*sizeof(double));
+  memset(loatdiff,0,257*sizeof(double));
 
   
   //dynode
@@ -622,6 +624,7 @@ void bdecayPSPMT::Reset()
   amax = 0;
   amaxcent = 0;
   amult = 0;
+  amult_raw = 0;
   amaxx = 0;
   amaxy = 0;
   amaxtime = 0;

@@ -1,6 +1,8 @@
 /* Correlator for Mg32 experiment
  * Based on DSSDCorrelator.cpp from Spectcl by S. Liddick
  * Yongchi Xiao, June, 2018
+ * S. N. Liddick, June, 2018
+ * B. P. Crider, June, 2018
  */
 
 #include <RConfigure.h>
@@ -155,7 +157,10 @@ double Correlator::Correlate(betadecay &bdecay, betadecayvariables &bdecayv,
   if(hasPin01 && hasPspmt) {
     isImplant = true;
   }
-  if(!hasPin && hasPspmt && !overflowPSPMT) {
+  //also putting a cut on dynode energy to throw out what appear to be
+  //light ions (this hopefully is just a temporary fix since we
+  //lose ~20% of ions right off the bat
+  if(!hasPin && hasPspmt && !overflowPSPMT && bdecay.pspmt.dyamp < 6000) {
     isDecay = true; 
   }
   if(!hasPin && hasPspmt && overflowPSPMT) {

@@ -594,22 +594,36 @@ void betadecayvariables::ReadSega(char *Name){
 
 void betadecayvariables::ReadPSPMT(char *Name){
 
-  // cout<<"Reading PSPMT"<<endl;
-  // cout<<Name<<endl;
+  cout<<"Reading PSPMT"<<endl;
+  cout<<Name<<endl;
 
-  // ifstream calfile(Name);
+  ifstream calfile(Name);
   // int linenum = 0;
 
   // int location = -1;
   // double value = 0;
  
-  // if(!calfile){
-  //   cout << "Unable to open file " << Name << endl;
-  // }
-  // else{
-  //   //read in cal file until end of file
-  //   while(calfile){
-  //     if(calfile && (isdigit(calfile.peek()))){
+  if(!calfile){
+    cout << "Unable to open file " << Name << endl;
+  }
+  else{
+   //read in cal file until end of file
+    while(calfile){
+
+      int location;
+      double value;
+      
+      calfile >> location >> value;
+      
+      pspmt.slope[location] = value;
+
+      cout<<"PSPMT Anode: "<<location<<" gain: "<<value<<endl;
+      if(location == 256) {
+	break;
+      }
+    }
+  }
+      //  if(calfile && (isdigit(calfile.peek()))){
   // 	linenum++;
 
   // 	if(linenum < 81) {
@@ -642,7 +656,7 @@ void betadecayvariables::ReadPSPMT(char *Name){
   //   } // end while read
 
   // }
-  // calfile.close();
+   calfile.close();
 
 }
 
