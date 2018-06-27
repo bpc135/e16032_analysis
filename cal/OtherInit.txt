@@ -35,7 +35,7 @@
 1.0
 #
 #bdecay.pin01.ithresh
-1000
+9000
 #
 #bdecayv.pin01.iuld
 90000

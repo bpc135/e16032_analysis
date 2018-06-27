@@ -224,6 +224,7 @@ class bdecayvPSPMTCalibrator
   float thresh[258];
   float ithresh[258];
   float uld[258];
+  float time_deviation[258]; 
   
  public:
   bdecayvPSPMTCalibrator();

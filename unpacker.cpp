@@ -273,6 +273,7 @@ int unpack_event(int eventnum, betadecay *bdecay, betadecayvariables *bdecayv,ve
   //int dynode_counter=0; 
   //bool dynode_present = false;
 
+  //Loop over channel list for looking at dynodes
   for (channellist_it = channellist.begin(); channellist_it < channellist.end(); channellist_it++) {
 
     //cout << (*channellist_it)->haveExtension << endl;

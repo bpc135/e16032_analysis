@@ -27,7 +27,7 @@ void SetInitialPixie16Utilities(Pixie16Utilities *myUtils/*, vector<UShort_t> tr
   Int_t energy_range;           //Sets the Energy Filter Range
 
   //THESE NEED TO BE UPDATED FOR e16032!!!!!
-  Int_t trace_delaymod[20] = {500,250,300,0,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120};
+  Int_t trace_delaymod[20] = {500,250,600,0,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120};
   Int_t trigfilt_gapmod[20] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
   if(adcfreq == 500 && modnum == 0){
@@ -263,6 +263,9 @@ void analyze_dynode(int crateid, int slotid, int channum, vector<UShort_t> trace
     if(modnum==0){
       lo = 0;
       high =Int_t ( 150. / (Int_t(1000./ModMSPS)));
+    }else if(modnum == 2){
+      lo = 0;
+      high =Int_t ( 200. / (Int_t(1000./ModMSPS)));
     }
     else{
       lo = 0;
@@ -564,18 +567,23 @@ void analyze_event(int crateid, int slotid, int channum, vector<UShort_t> trace,
     bdecay->clyc.area[detnum] = area;
     bdecay->clyc.areacal[detnum] = areacal;
 
+    //cout << "In clyc, baseline = " << baseline << endl;
     //first sum
-    for(int i=200;i<=220;i++){
+    for(int i=200;i<225;i++){
       bdecay->clyc.shortsum[detnum] += (trace[i] - baseline);
     }
     //second sum
-    for(int i=220;i<=420;i++){
+    for(int i=225;i<=425;i++){
       bdecay->clyc.longsum[detnum] += (trace[i] - baseline);
     }
     //third sum
     for(int i=200;i<=700;i++){
       bdecay->clyc.fullsum[detnum] += (trace[i] - baseline);
     }
+    // cout << "shortsum = " << bdecay->clyc.shortsum[detnum] << endl;
+    // cout << "longsum = " << bdecay->clyc.longsum[detnum] << endl;
+    // cout << "fullsum = " << bdecay->clyc.fullsum[detnum] << endl;
+    
   }
 
   //I2N input into PIXIE

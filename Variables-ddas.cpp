@@ -167,6 +167,7 @@ void bdecayvPSPMTCalibrator::Initialize()
     thresh[i] = 0.;
     ithresh[i] = 0.;
     uld[i] = 4095.;
+    time_deviation[i] = 0;
   }
 }
 
