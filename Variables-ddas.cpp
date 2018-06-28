@@ -8,6 +8,7 @@ using namespace std;
 #include <iostream>
 #include <istream>
 #include <iomanip>
+#include <math.h>
 
 #include "Variables-ddas.h"
 
@@ -141,6 +142,7 @@ void bdecayvHitFlag::Initialize()
   clyc    = 0;
   i2n     = 0;
   i2s     = 0;
+  dynode  = 0;
 }  
 
 bdecayvCorrelation::bdecayvCorrelation(){
@@ -593,6 +595,39 @@ void betadecayvariables::ReadSega(char *Name){
 
 }
 
+void betadecayvariables::ReadPSPMT_TimeDev(char *Name){
+
+  cout<<"Reading PSPMT Time Dev"<<endl;
+  cout<<Name<<endl;
+
+  ifstream calfile(Name);
+  // int linenum = 0;
+
+  // int location = -1;
+  // double value = 0;
+ 
+  if(!calfile){
+    cout << "Unable to open file " << Name << endl;
+  }
+  else{
+   //read in cal file until end of file
+    while(calfile){
+
+      int location;
+      double value;
+      
+      calfile >> location >> value;
+      
+      pspmt.time_deviation[location] = value;
+
+      cout<<"PSPMT TimeDev Anode: "<<location<<" TimeDev: "<<pspmt.time_deviation[location]<<endl;
+      if(location == 256) {
+	break;
+      }
+    }
+  }
+}
+
 void betadecayvariables::ReadPSPMT(char *Name){
 
   cout<<"Reading PSPMT"<<endl;
@@ -624,6 +659,25 @@ void betadecayvariables::ReadPSPMT(char *Name){
       }
     }
   }
+
+
+  //ULD on anodes
+  for(int eye=1; eye<257; eye++) {
+    if(eye >=1 && eye <= 48) {
+      pspmt.uld[eye] = 0.95*pow(2,15.0);
+    }
+    else if(eye >48 && eye <= 208) {
+      pspmt.uld[eye] = 0.95*pow(2,16.0);
+    }
+    else if(eye >208 && eye <= 256) {
+      pspmt.uld[eye] = 0.95*pow(2,15.0);
+    }
+    else {
+      cout<<"Something is very wrong"<<endl;
+    }
+  }
+
+  
       //  if(calfile && (isdigit(calfile.peek()))){
   // 	linenum++;
 

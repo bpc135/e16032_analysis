@@ -137,6 +137,7 @@ class bdecayvHitFlag
   int pspmt;
   int i2n;
   int i2s;
+  int dynode;
   
  public:
   bdecayvHitFlag();
@@ -219,12 +220,12 @@ class bdecayvSegaCalibrator
 class bdecayvPSPMTCalibrator
 {
  public:
-  float offset[258];
-  float slope[258];
-  float thresh[258];
-  float ithresh[258];
-  float uld[258];
-  float time_deviation[258]; 
+  double offset[258];
+  double slope[258];
+  double thresh[258];
+  double ithresh[258];
+  double uld[258];
+  double time_deviation[258]; 
   
  public:
   bdecayvPSPMTCalibrator();
@@ -323,6 +324,7 @@ class betadecayvariables
   void ReadLaBr3(char *Name);
   void ReadCLYC(char *Name);
   void ReadPSPMT(char *Name);
+  void ReadPSPMT_TimeDev(char *Name);
 
 };
 

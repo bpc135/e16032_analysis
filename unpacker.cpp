@@ -8,6 +8,170 @@
 #include "analyzer.h"
 
 
+//define the utilities for the various modules
+void SetInitialPixie16Utilities(Pixie16Utilities *myUtils/*, vector<UShort_t> tr*/, int adcfreq, int modnum){
+
+  //Initialize the Pixie16Utilities Info
+      
+  int adc_freq = adcfreq;             //Sets the ADC Frequency (input is in MHz or MSPS)
+  int trace_delay;          //Sets the Trace Delay (input is in ns)
+  int trigfilt_gap;           //Sets the Trigger Filter Gap (input is in ns)
+  int trigfilt_range;         //Sets the Trigger Filter Range
+  int trigfilt_length;       //Sets the Trigger Filter Length
+  int trigfilt_threshold;   //Sets the Trigger Filter Threshold
+  
+  int cfd_threshold;         //Sets the CFD Threshold
+  int cfd_delay;             //Sets the CFD (input is in ns)
+  int cfd_scalefact;          //Sets the CFD Scale Factor and calculates the weighting factor
+  int tau_val;               //Sets the value of Tau and Calculates Energy Filter coefficients
+  
+  Int_t energy_length;        //Sets the Energy Filter Length (input is in ns)
+  Int_t energy_gap;            //Sets the Energy Filter Gap (input is in ns)
+  Int_t energy_range;           //Sets the Energy Filter Range
+
+  //THESE NEED TO BE UPDATED FOR e16032!!!!!
+  Int_t trace_delaymod[20] = {500,250,600,0,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120};
+  Int_t trigfilt_gapmod[20] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+
+  if(adcfreq == 500 && modnum == 0){
+    trace_delay = 200;          
+    trigfilt_gap = 0;           
+    trigfilt_range = 0;         
+    trigfilt_length = 100;      
+    trigfilt_threshold = 10;   
+  
+    cfd_threshold = 20;         
+    cfd_delay = 16;             
+    cfd_scalefact = 0;          
+    tau_val = 20;               
+  
+    energy_length = 200;        
+    energy_gap = 60;            
+    energy_range = 1;           
+  }else if(adcfreq == 500){ //anode 500
+    trace_delay = 80;          
+    trigfilt_gap = 0;           
+    trigfilt_range = 0;         
+    trigfilt_length = 100;      
+    trigfilt_threshold = 10;   
+  
+    cfd_threshold = 20;         
+    cfd_delay = 16;             
+    cfd_scalefact = 0;          
+    tau_val = 60;               
+  
+    energy_length = 400;        
+    energy_gap = 160;            
+    energy_range = 1;
+  }else{//250
+    trace_delay = 80;          
+    trigfilt_gap = 0;           
+    trigfilt_range = 0;         
+    trigfilt_length = 100;      
+    trigfilt_threshold = 15;   
+  
+    cfd_threshold = 20;         
+    cfd_delay = 16;             
+    cfd_scalefact = 0;          
+    tau_val = 20;               
+  
+    energy_length = 400;        
+    energy_gap = 160;            
+    energy_range = 1;
+  }
+
+  int err = 0;
+  
+  //trace info
+  err = myUtils->SetADCFrequency(adc_freq);
+  if(err != 0) {
+    cout<<"Fail SetADCFrequency() err = "<<err<<endl;
+  }
+  err = myUtils->SetTraceDelay(trace_delaymod[modnum]);
+  if(err != 0) {
+    cout<<"Fail SetTraceDelay() err = "<<err<<endl;
+  }
+
+  //trigger filter info
+  // err = myUtils->SetTFGap(trigfilt_gap);
+  // if(err != 0) {
+  //   cout<<"Fail SetTFGap() err = "<<err<<endl;
+  // }
+  // err = myUtils->SetTFRange(trigfilt_range);
+  // if(err != 0) {
+  //   cout<<"Fail SetTFRange() err = "<<err<<endl;
+  // }
+  // err = myUtils->SetTFLength(trigfilt_length);
+  // if(err != 0) {
+  //   cout<<"Fail SetTFLength() err = "<<err<<endl;
+  // }
+  // err = myUtils->SetTFThreshold(trigfilt_threshold);
+  // if(err != 0) {
+  //   cout<<"Fail SetTFThreshold() err = "<<err<<endl;
+  // }
+  //cfd info
+  err = myUtils->SetCFDThreshold(cfd_threshold);
+  if(err != 0) {
+    cout<<"Fail SetCFDThreshold() err = "<<err<<endl;
+  }
+
+  
+  err = myUtils->SetCFDDelay(cfd_delay);
+  if(err != 0) {
+    cout<<"Fail SetCFDDelay() err = "<<err<<endl;
+  }
+  err = myUtils->SetCFDSF(cfd_scalefact);
+  if(err != 0) {
+    cout<<"Fail SetCFDSF() err = "<<err<<endl;
+  }
+  err = myUtils->SetVerbosity(0);
+  if(err != 0) {
+    cout<<"Fail SetVerbosity err = "<<err<<endl;
+  }
+  
+  //energy filter info
+  // err = myUtils->SetEFLength(energy_length);
+  // if(err != 0) {
+  //   cout<<"Fail SetEFLength() err = "<<err<<endl;
+  // }
+  // err = myUtils->SetEFGap(energy_gap);
+  // if(err != 0) {
+  //   cout<<"Fail SetEFGap() err = "<<err<<endl;
+  // }
+  // err = myUtils->SetEFRange(energy_range);
+  // if(err != 0) {
+  //   cout<<"Fail SetEFRange() err = "<<err<<endl;
+  // }
+  // //set peak sample
+  // err = myUtils->SetPeaksample();
+  // if(err != 0){
+  //   cout << "Fail SetPeaksample() err = " << err << endl;
+  // }
+
+  
+  
+  //// //Calculate the energy filter and trigger filter
+  ////cout << "trace size = " << tr.size() << endl;
+  //err = myUtils->CalculateTriggerFilter(tr);
+  //if(err != 0){
+  //  cout << "Fail CalculateEnergyFilter() err = " << err << endl;
+  //}
+  //err = myUtils->CalculateEnergyFilter(tr);
+  //if(err != 0){
+  //  cout << "Fail CalculateEnergyFilter() err = " << err << endl;
+  //}
+  //tau info, which also sets the crucial filter parameters r1, b1
+  // err = myUtils->SetTau(tau_val);
+  // if(err != 0) {
+  //   cout<<"Fail SetTau() err = "<<err<<endl;
+  // }
+  
+  //cout << "Set Initial Pixie16Utilities" << endl;  
+  
+} //SetInitialPixie16Utilities
+
+
+
 //CALIBRATION
 
 //specify the folder where the default calibration files are found.  This folder
@@ -20,6 +184,8 @@ char OtherDefault[] = "OtherInit.txt";
 string LaBr3Default;
 string CLYCDefaut;
 string PSPMTDefault;
+string PSPMTDefault_Time;
+
 //char LaBr3Default[] = "LaBr3Init.txt";
 
 double starttime;
@@ -47,12 +213,21 @@ void reset_channel_list(vector<DDASRootFitHit*> channellist,  vector<DDASRootFit
 }
 
 
-int unpack_data(TTree *tree_in, TTree *tree_out, string Run_Number ) {
+int unpack_data(TTree *tree_in, TTree *tree_out, string Run_Number  ) {
 
-  //Channelist of the Event Vector
-  //vector<ddaschannel*>  channellist;
-  //vector<ddaschannel*>::iterator channellist_it;
 
+  //the above arrays can be used to reference the frequency
+  Pixie16Utilities *utils[20];
+  int mod_freq[20] = {500,500,250,100,250,250,250,250,250,500,500,500,500,500,500,250,250,250,250,250};
+  for(int m=0;m<20;m++){
+    int ModMSPS = mod_freq[m];
+    utils[m] = new Pixie16Utilities();
+    SetInitialPixie16Utilities(utils[m],ModMSPS,m);
+
+    // cout<<"After setting: "<<utils[m]->GetTraceDelay()<<endl;
+
+  }
+  
   vector<DDASRootFitHit*> channellist;
   vector<DDASRootFitHit*>::iterator channellist_it;
 
@@ -79,7 +254,8 @@ int unpack_data(TTree *tree_in, TTree *tree_out, string Run_Number ) {
   char LaBr3InitName[100];
   char CLYCInitName[100];
   char PSPMTInitName[100];
-  
+  char PSPMTInitTimeName[100];
+
   string tempsega;
   //tempsega = "SeGAInit_"+Run_Number.substr(0,4)+".txt";
   tempsega = "SeGAInit_basic.txt";
@@ -94,21 +270,29 @@ int unpack_data(TTree *tree_in, TTree *tree_out, string Run_Number ) {
   //temppspmt = "PSPMTInit_"+Run_Number.substr(0,4)+".txt";
   //temppspmt = "PSPMTInit_basic.txt";
   temppspmt = "PSPMTInit_Anodes.txt";
-
   PSPMTDefault = temppspmt;
+
+  string temppspmt_time;
+  temppspmt_time = "Anode_TimeDevs_"+Run_Number.substr(0,4)+".txt";
+  PSPMTDefault_Time = temppspmt_time;
+    
     
   cout<<SegaDefault<<endl;
   cout<<LaBr3Default<<endl;
   cout<<PSPMTDefault<<endl;
+  cout<<PSPMTDefault_Time<<endl;
+
   sprintf(SegaInitName, "%s/%s", calDefaultPath, SegaDefault.c_str());
   sprintf(OtherInitName, "%s/%s", calDefaultPath, OtherDefault);
   sprintf(LaBr3InitName, "%s/%s", calDefaultPath, LaBr3Default.c_str());
   sprintf(PSPMTInitName, "%s/%s", calDefaultPath, PSPMTDefault.c_str());
-  
+  sprintf(PSPMTInitTimeName, "%s/%s", calDefaultPath, PSPMTDefault_Time.c_str());
+
   bdecayv.ReadSega(SegaInitName);
   bdecayv.ReadOther(OtherInitName);
   bdecayv.ReadLaBr3(LaBr3InitName);
   bdecayv.ReadPSPMT(PSPMTInitName);
+  bdecayv.ReadPSPMT_TimeDev(PSPMTInitTimeName);
 
   //Report the correlation time
   cout << "Correlation time " << bdecayv.clock.max << endl;
@@ -129,9 +313,6 @@ int unpack_data(TTree *tree_in, TTree *tree_out, string Run_Number ) {
   int oneper = (int)(nevents * 0.01);
   int tenthper = (int)(nevents * 0.001);
 
-  //DDASEvent
-  //DDASEvent *devent
-
   vector<RootHitExtension>* fitdata(0);
   tree_in->SetBranchAddress("HitFits", &fitdata);
 
@@ -150,7 +331,7 @@ int unpack_data(TTree *tree_in, TTree *tree_out, string Run_Number ) {
     //cout << "Events processed " << ii << " - percent done " << (int)(ii/tenthper)*0.1 << "%"<<endl;
     //}
     //check with only 1% of the file
-    // if( (ii > 0) && (ii % fiveper) == 0) {
+    //  if( (ii > 0) && (ii % fiveper) == 0) {
     //   break;
     // }
 
@@ -158,17 +339,12 @@ int unpack_data(TTree *tree_in, TTree *tree_out, string Run_Number ) {
     reset_channel_list(channellist,channellist_it);
 
     //Make the event
-    //devent = new DDASEvent();
     rawhits = new DDASRootFitEvent();
     
     //***NEEDED FOR EVT BLT***//
     TBranch *aRawHitsevent = tree_in->GetBranch("RawHits");
     aRawHitsevent->SetAddress(&rawhits);
-    
-    //    TBranch *fitBranch = tree_in->GetBranch("HitFits");
-    //   fitBranch->SetAddress(&fitdata);
-
-    
+        
     //Get the event
     tree_in->GetEntry(ii);
 
@@ -194,16 +370,15 @@ int unpack_data(TTree *tree_in, TTree *tree_out, string Run_Number ) {
     // }
  
     //Unpack the event
-    unpack_event(ii,&bdecay,&bdecayv,channellist,channellist_it);
+    unpack_event(ii,&bdecay,&bdecayv,channellist,channellist_it, &utils[0]);
 
     unpack_double_pulse(ii,&bdecay,fitdata);
   
     //Reset root output
     rootout->Reset();
-
+   
     //Correlate this event
     int impdec = corr.Correlate(bdecay,bdecayv,16,16,0);
-
     
     //Fill with results of analysis
     // if(bdecay.pspmt.dyenergy>0 || bdecay.segatotal.mult>0 || bdecay.labr3.mult>0) {
@@ -250,7 +425,7 @@ int unpack_data(TTree *tree_in, TTree *tree_out, string Run_Number ) {
 }
 
   
-int unpack_event(int eventnum, betadecay *bdecay, betadecayvariables *bdecayv,vector<DDASRootFitHit*> channellist, vector<DDASRootFitHit*>::iterator channellist_it )  {
+int unpack_event(int eventnum, betadecay *bdecay, betadecayvariables *bdecayv,vector<DDASRootFitHit*> channellist, vector<DDASRootFitHit*>::iterator channellist_it, Pixie16Utilities *utils[]  )  {
 
   bdecay->Reset();
   bdecayv->hit.Initialize();
@@ -276,30 +451,13 @@ int unpack_event(int eventnum, betadecay *bdecay, betadecayvariables *bdecayv,ve
   //Loop over channel list for looking at dynodes
   for (channellist_it = channellist.begin(); channellist_it < channellist.end(); channellist_it++) {
 
-    //cout << (*channellist_it)->haveExtension << endl;
-
-
     int crateid = (*channellist_it)->crateid;
     int slotid = (*channellist_it)->slotid;
     int channum = (*channellist_it)->chanid;
-    
-    if(crateid==0 && slotid==2 && channum ==0) {
 
-      if (channellist_it == channellist.begin()) {
-	
-	/* Calculate time difference between events. */
-	double tdiffevent = ((*channellist_it)->time) - starttime;
-	tdiffevent = tdiffevent/100.; /* Microseconds time difference. */
-	bdecay->ddasdiagnostics.tdiffevent = tdiffevent;
-	
-	starttime = (*channellist_it)->time;
-	
-	bdecay->clock.fast = (*channellist_it)->timelow;
-	bdecay->clock.slow = (*channellist_it)->timehigh;
-	//bdecay->clock.full = (*channellist_it)->time;
-	bdecay->clock.cfd = (*channellist_it)->cfd;
-	bdecay->clock.initial = (*channellist_it)->time;
-      }
+    // Only look for the dynode
+    if(crateid==0 && slotid==2 && channum ==0) {
+  
       //Update the current time for each entry
       bdecay->clock.current = (*channellist_it)->time;
       
@@ -309,34 +467,30 @@ int unpack_event(int eventnum, betadecay *bdecay, betadecayvariables *bdecayv,ve
       if (crateid == 0) {
 	adcnumber = slotid - 1;
       }else{
-	//crateid = 1
 	adcnumber = slotid + 12;
       }
-    
-      bdecay->ddasdiagnostics.adchit[adcnumber] += pow(2.,(double)(*channellist_it)->chanid);
-      bdecay->adc[adcnumber].channel[channum] = ((*channellist_it)->energy);
-      bdecay->tdc[adcnumber].time[channum] = ((*channellist_it)->cfd);
-      bdecay->time[adcnumber].timelow[channum] = ((*channellist_it)->timelow);
-      bdecay->time[adcnumber].timehigh[channum] = ((*channellist_it)->timehigh);
-      bdecay->time[adcnumber].timefull[channum] = ((*channellist_it)->time);
-      bdecay->time[adcnumber].timecfd[channum] = ((*channellist_it)->timecfd);
-    
-      //  if(adcnumber==1 && channum == 1) {
-      //    cout<<"time labr3_0: "<<bdecay->time[adcnumber].timefull[channum]<<endl;
-      //  }
 
-      //cout << "bdecay->adc[" << adcnumber << ".channel[" << channum << "] = " << bdecay->adc[adcnumber].channel[channum] << endl;
-    
-      //check for trace and extract
-      if( (*channellist_it)->tracelength != 0 ){
-	bdecay->adc[adcnumber].chantrace[channum].trace = (*channellist_it)->GetTrace();	
+      if(!bdecayv->hit.dynode) {
+
+	bdecayv->hit.dynode = 1;
+	bdecay->ddasdiagnostics.adchit[adcnumber] += pow(2.,(double)(*channellist_it)->chanid);
+	bdecay->adc[adcnumber].channel[channum] = ((*channellist_it)->energy);
+	// bdecay->tdc[adcnumber].time[channum] = ((*channellist_it)->time);
+	bdecay->time[adcnumber].timefull[channum] = ((*channellist_it)->time);
+	
+	//check for trace and extract
+	if( (*channellist_it)->tracelength != 0 ){
+	  bdecay->adc[adcnumber].chantrace[channum].trace = (*channellist_it)->GetTrace();	
+	}
+	
+	//Map/analyze the channel, calibrate, and threshold check
+	analyze_dynode(crateid, slotid, channum, (*channellist_it)->GetTrace(), bdecay, bdecayv, eventnum, &utils[0]);
       }
-    
-      //Map/analyze the channel, calibrate, and threshold check
-      analyze_dynode(crateid, slotid, channum, (*channellist_it)->GetTrace(), bdecay, bdecayv, eventnum);
-    }
+    } //end check on dynode hit
   } //End loop over channel list for looking at dynodes
 
+
+  
   
   for (channellist_it = channellist.begin(); channellist_it < channellist.end(); channellist_it++) {
 
@@ -356,6 +510,8 @@ int unpack_event(int eventnum, betadecay *bdecay, betadecayvariables *bdecayv,ve
 
     // The time of an event will be taken as the time of the first 
     // channel in the event. 
+
+
     
     if (channellist_it == channellist.begin()) {
       /* Calculate time difference between events. */
@@ -374,40 +530,38 @@ int unpack_event(int eventnum, betadecay *bdecay, betadecayvariables *bdecayv,ve
     //Update the current time for each entry
     bdecay->clock.current = (*channellist_it)->time;
 
-    // Unpack data for ddasdiagnostics
-    // first slot is slot 2 for each crate
-    unsigned int adcnumber = 0;
-    if (crateid == 0) {
-      adcnumber = slotid - 1;
-    }else{
-      //crateid = 1
-      adcnumber = slotid + 12;
-    }
+    if(!(crateid==0 && slotid==2 && channum ==0)) {
+      // if(1) {
+      // Unpack data for ddasdiagnostics
+      // first slot is slot 2 for each crate
+      unsigned int adcnumber = 0;
+      if (crateid == 0) {
+	adcnumber = slotid - 1;
+      }else{
+	//crateid = 1
+	adcnumber = slotid + 12;
+      }
+      
     
-    bdecay->ddasdiagnostics.adchit[adcnumber] += pow(2.,(double)(*channellist_it)->chanid);
-    bdecay->adc[adcnumber].channel[channum] = ((*channellist_it)->energy);
-    bdecay->tdc[adcnumber].time[channum] = ((*channellist_it)->cfd);
-    bdecay->time[adcnumber].timelow[channum] = ((*channellist_it)->timelow);
-    bdecay->time[adcnumber].timehigh[channum] = ((*channellist_it)->timehigh);
-    bdecay->time[adcnumber].timefull[channum] = ((*channellist_it)->time);
-    bdecay->time[adcnumber].timecfd[channum] = ((*channellist_it)->timecfd);
-    
-    //  if(adcnumber==1 && channum == 1) {
-    //    cout<<"time labr3_0: "<<bdecay->time[adcnumber].timefull[channum]<<endl;
-    //  }
-
-    //cout << "bdecay->adc[" << adcnumber << ".channel[" << channum << "] = " << bdecay->adc[adcnumber].channel[channum] << endl;
-    
-    //check for trace and extract
-    if( (*channellist_it)->tracelength != 0 ){
-      bdecay->adc[adcnumber].chantrace[channum].trace = (*channellist_it)->GetTrace();	
-    }
-    
-    //Map/analyze the channel, calibrate, and threshold check
-    analyze_event(crateid, slotid, channum, (*channellist_it)->GetTrace(), bdecay, bdecayv, eventnum);
-    
-    endtime = (*channellist_it)->time;
-    
+      bdecay->ddasdiagnostics.adchit[adcnumber] += pow(2.,(double)(*channellist_it)->chanid);
+      bdecay->adc[adcnumber].channel[channum] = ((*channellist_it)->energy);
+      // bdecay->tdc[adcnumber].time[channum] = ((*channellist_it)->time);
+      bdecay->time[adcnumber].timefull[channum] = ((*channellist_it)->time);
+      
+      //cout << "bdecay->adc[" << adcnumber << ".channel[" << channum << "] = " << bdecay->adc[adcnumber].channel[channum] << endl;
+      
+      //check for trace and extract
+      if( (*channellist_it)->tracelength != 0 ){
+	bdecay->adc[adcnumber].chantrace[channum].trace = (*channellist_it)->GetTrace();	
+      }
+      
+      // cout<<"About to analyze: "<<adcnumber-1<<"  "<< utils[adcnumber-1]->GetTraceDelay() <<endl;
+      
+      //Map/analyze the channel, calibrate, and threshold check
+      analyze_event(crateid, slotid, channum, (*channellist_it)->GetTrace(), bdecay, bdecayv, eventnum, &utils[0]);
+      
+      endtime = (*channellist_it)->time;
+    } //End "not dynode" check
   } //End loop over channel list
 
 
@@ -458,6 +612,7 @@ int unpack_event(int eventnum, betadecay *bdecay, betadecayvariables *bdecayv,ve
 
   //time difference between dynode and max anode
   bdecay->pspmt.dytdiff = bdecay->pspmt.dytime - bdecay->pspmt.amaxtime;
+  bdecay->pspmt.dytdiffmin = bdecay->pspmt.dytime - bdecay->pspmt.amintime;
     
   //Determine x and y positions for pspmt
   double asumcent, asumcent50, aampsumcent, aampsumcent50, aareasumcent, aareasumcent50, amaxcent, aampmaxcent, aampmaxcentcal, aareacent, aareamaxcent,aareamaxcentcal = -1.0;
@@ -465,28 +620,25 @@ int unpack_event(int eventnum, betadecay *bdecay, betadecayvariables *bdecayv,ve
   //first determine maxima within the intended thresholds for the centroid determinations
   for(int i=1; i<257; i++){
 
-    if(bdecay->pspmt.aecal[i]>0 && bdecay->pspmt.aecal[i] < 12000){
+    if(bdecay->pspmt.aecal[i]>0){
 
       if(bdecay->pspmt.atime[i] > 0 && bdecay->pspmt.dytime > 0){
 	bdecay->pspmt.atdiff[i] = bdecay->pspmt.dytime - bdecay->pspmt.atime[i];
+	bdecay->pspmt.atdiffmin[i] = bdecay->pspmt.dytimemin - bdecay->pspmt.atime[i];
       }
       //just set it to something at wont matter
       else {
 	bdecay->pspmt.atdiff[i] = 123456.78;
+	bdecay->pspmt.atdiffmin[i] = 876543.21;
       }
     }
   }
   //first determine maxima within the intended thresholds for the centroid determinations
   for(int i=1; i<257; i++){
-
-    if(bdecay->pspmt.aecal[i]>0 && bdecay->pspmt.aecal[i] < 12000  && TMath::Abs(bdecay->pspmt.atdiff[i]) < 100) {
-
-      //  if(bdecay->pspmt.aecal[i]>0 && bdecay->pspmt.aecal[i] < 12000) {
-      
-      //pixie energies
-      // if(bdecay->pspmt.aecal[i] > 0 && bdecay->pspmt.aecal[i] < 30000 ){
+    //time condition implicit
+    if(bdecay->pspmt.aecal[i]>0) {
 	
-      if(bdecay->pspmt.dyecal>0) bdecayv->hit.pspmt = 1;
+      if(bdecay->pspmt.dyamp>0) bdecayv->hit.pspmt = 1;
       if(bdecay->pspmt.aecal[i] > amaxcent){
 	amaxcent = bdecay->pspmt.aecal[i];
 	bdecay->pspmt.asum += bdecay->pspmt.aecal[i];
@@ -518,6 +670,19 @@ int unpack_event(int eventnum, betadecay *bdecay, betadecayvariables *bdecayv,ve
     }
   }
 
+  // //************999999999999**********
+  // for(int i=1; i<257; i++){
+
+  //   if(bdecay->pspmt.aecal[i]>0 && bdecay->pspmt.aecal[i] < 12000  && TMath::Abs(bdecay->pspmt.atdiffmin[i]) < 100) {
+	
+  //     if(bdecay->pspmt.dyecal>0) bdecayv->hit.pspmt = 1;
+  //     if(bdecay->pspmt.aecal[i] < amaxcent){
+  // 	amaxcent = bdecay->pspmt.aecal[i];
+  // 	bdecay->pspmt.asum += bdecay->pspmt.aecal[i];
+  //     }
+  //   }
+  // }
+  
   // if(bdecay->pspmt.dyenergy>0) {
   //   cout<<"amaxcent: "<<amaxcent<<" Dynode: "<<bdecay->pspmt.dyenergy<<endl;
   // }
@@ -536,10 +701,7 @@ int unpack_event(int eventnum, betadecay *bdecay, betadecayvariables *bdecayv,ve
 
     // if(bdecay->pspmt.aampcal[i] > 0 && bdecay->pspmt.aampcal[i] < 100000 && TMath::Abs(bdecay->pspmt.atdiff[i]) < 50){
 
-    if(bdecay->pspmt.aecal[i]>0 && bdecay->pspmt.aecal[i] < 12000 && TMath::Abs(bdecay->pspmt.atdiff[i]) < 100){
-
-      // if(bdecay->pspmt.aecal[i]>0 && bdecay->pspmt.aecal[i] < 12000){
-      //cout.precision(15);
+    if(bdecay->pspmt.aecal[i]>0){
 
       //   cout<<"Eventnum: "<<eventnum<<"  i: "<<i<<" \ty: "<<ypix<<" \tx: "<<xpix<<" \tE: "<<bdecay->pspmt.aecal[i]<<"\t A: "<<bdecay->pspmt.aampcal[i]<<"  T: "<<bdecay->pspmt.atime[i]<<"  DyT: "<<bdecay->pspmt.dytime<<" Diff: "<<bdecay->pspmt.atdiff[i]<<endl;    
       

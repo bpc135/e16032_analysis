@@ -248,7 +248,12 @@ class bdecayCorr: public TObject
   float iimax;
   int itof;
   double iasum; // yx
+  double dyecal; // yx
+  double dyamp; // yx
   double idyecal; // yx
+  double idyamp; // yx
+  double didyecal; // yx
+  double didyamp; // yx
   //
   double gtimecal;
   double gtime;
@@ -381,7 +386,9 @@ class bdecayPSPMT: public TObject
   double dyareacal;
   int dyoverflow;
   double dytime;
+  double dytimemin;
   double dytdiff;  //time difference between dynode and anode with highest amplitude
+  double dytdiffmin;  //time difference between dynode and anode with lowest amplitude
   double dyeventtdc;
   
   //double pulse
@@ -417,16 +424,20 @@ class bdecayPSPMT: public TObject
   double asum;
   double atime[257];
   double amax;
+  double amin;
   double amaxcal;
+  double amincal;
   double atdiff[257];
+  double atdiffmin[257];
   int aoverflow[257];
   int amult;
   int amult_raw;
   int amaxx;
   int amaxy;
-  double amaxxcal;
-  double amaxycal;
+  int aminx;
+  int aminy;
   double amaxtime;
+  double amintime;
   double posxEcent;
   double posyEcent;
   double posxEcent50;

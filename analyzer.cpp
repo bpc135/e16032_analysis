@@ -5,161 +5,6 @@
 #include "TRandom.h"
 #include "TRandom3.h"
 
-//define the utilities for the various modules
-void SetInitialPixie16Utilities(Pixie16Utilities *myUtils/*, vector<UShort_t> tr*/, int adcfreq, int modnum){
-
-  //Initialize the Pixie16Utilities Info
-      
-  int adc_freq = adcfreq;             //Sets the ADC Frequency (input is in MHz or MSPS)
-  int trace_delay;          //Sets the Trace Delay (input is in ns)
-  int trigfilt_gap;           //Sets the Trigger Filter Gap (input is in ns)
-  int trigfilt_range;         //Sets the Trigger Filter Range
-  int trigfilt_length;       //Sets the Trigger Filter Length
-  int trigfilt_threshold;   //Sets the Trigger Filter Threshold
-  
-  int cfd_threshold;         //Sets the CFD Threshold
-  int cfd_delay;             //Sets the CFD (input is in ns)
-  int cfd_scalefact;          //Sets the CFD Scale Factor and calculates the weighting factor
-  int tau_val;               //Sets the value of Tau and Calculates Energy Filter coefficients
-  
-  Int_t energy_length;        //Sets the Energy Filter Length (input is in ns)
-  Int_t energy_gap;            //Sets the Energy Filter Gap (input is in ns)
-  Int_t energy_range;           //Sets the Energy Filter Range
-
-  //THESE NEED TO BE UPDATED FOR e16032!!!!!
-  Int_t trace_delaymod[20] = {500,250,600,0,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,120};
-  Int_t trigfilt_gapmod[20] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-
-  if(adcfreq == 500 && modnum == 0){
-    trace_delay = 200;          
-    trigfilt_gap = 0;           
-    trigfilt_range = 0;         
-    trigfilt_length = 100;      
-    trigfilt_threshold = 10;   
-  
-    cfd_threshold = 20;         
-    cfd_delay = 16;             
-    cfd_scalefact = 0;          
-    tau_val = 20;               
-  
-    energy_length = 200;        
-    energy_gap = 60;            
-    energy_range = 1;           
-  }else if(adcfreq == 500){ //anode 500
-    trace_delay = 80;          
-    trigfilt_gap = 0;           
-    trigfilt_range = 0;         
-    trigfilt_length = 100;      
-    trigfilt_threshold = 10;   
-  
-    cfd_threshold = 20;         
-    cfd_delay = 16;             
-    cfd_scalefact = 0;          
-    tau_val = 60;               
-  
-    energy_length = 400;        
-    energy_gap = 160;            
-    energy_range = 1;
-  }else{//250
-    trace_delay = 80;          
-    trigfilt_gap = 0;           
-    trigfilt_range = 0;         
-    trigfilt_length = 100;      
-    trigfilt_threshold = 15;   
-  
-    cfd_threshold = 20;         
-    cfd_delay = 16;             
-    cfd_scalefact = 0;          
-    tau_val = 20;               
-  
-    energy_length = 400;        
-    energy_gap = 160;            
-    energy_range = 1;
-  }
-
-  int err = 0;
-  
-  //trace info
-  err = myUtils->SetADCFrequency(adc_freq);
-  if(err != 0) {
-    cout<<"Fail SetADCFrequency() err = "<<err<<endl;
-  }
-  err = myUtils->SetTraceDelay(trace_delaymod[modnum]);
-  if(err != 0) {
-    cout<<"Fail SetTraceDelay() err = "<<err<<endl;
-  }
-  //trigger filter info
-  // err = myUtils->SetTFGap(trigfilt_gap);
-  // if(err != 0) {
-  //   cout<<"Fail SetTFGap() err = "<<err<<endl;
-  // }
-  // err = myUtils->SetTFRange(trigfilt_range);
-  // if(err != 0) {
-  //   cout<<"Fail SetTFRange() err = "<<err<<endl;
-  // }
-  // err = myUtils->SetTFLength(trigfilt_length);
-  // if(err != 0) {
-  //   cout<<"Fail SetTFLength() err = "<<err<<endl;
-  // }
-  // err = myUtils->SetTFThreshold(trigfilt_threshold);
-  // if(err != 0) {
-  //   cout<<"Fail SetTFThreshold() err = "<<err<<endl;
-  // }
-  //cfd info
-  err = myUtils->SetCFDThreshold(cfd_threshold);
-  if(err != 0) {
-    cout<<"Fail SetCFDThreshold() err = "<<err<<endl;
-  }
-
-  
-  err = myUtils->SetCFDDelay(cfd_delay);
-  if(err != 0) {
-    cout<<"Fail SetCFDDelay() err = "<<err<<endl;
-  }
-  err = myUtils->SetCFDSF(cfd_scalefact);
-  if(err != 0) {
-    cout<<"Fail SetCFDSF() err = "<<err<<endl;
-  }
-  //energy filter info
-  // err = myUtils->SetEFLength(energy_length);
-  // if(err != 0) {
-  //   cout<<"Fail SetEFLength() err = "<<err<<endl;
-  // }
-  // err = myUtils->SetEFGap(energy_gap);
-  // if(err != 0) {
-  //   cout<<"Fail SetEFGap() err = "<<err<<endl;
-  // }
-  // err = myUtils->SetEFRange(energy_range);
-  // if(err != 0) {
-  //   cout<<"Fail SetEFRange() err = "<<err<<endl;
-  // }
-  // //set peak sample
-  // err = myUtils->SetPeaksample();
-  // if(err != 0){
-  //   cout << "Fail SetPeaksample() err = " << err << endl;
-  // }
-
-  
-  
-  //// //Calculate the energy filter and trigger filter
-  ////cout << "trace size = " << tr.size() << endl;
-  //err = myUtils->CalculateTriggerFilter(tr);
-  //if(err != 0){
-  //  cout << "Fail CalculateEnergyFilter() err = " << err << endl;
-  //}
-  //err = myUtils->CalculateEnergyFilter(tr);
-  //if(err != 0){
-  //  cout << "Fail CalculateEnergyFilter() err = " << err << endl;
-  //}
-  //tau info, which also sets the crucial filter parameters r1, b1
-  // err = myUtils->SetTau(tau_val);
-  // if(err != 0) {
-  //   cout<<"Fail SetTau() err = "<<err<<endl;
-  // }
-  
-  //cout << "Set Initial Pixie16Utilities" << endl;  
-  
-} //SetInitialPixie16Utilities
 
 
 /*****************************************/
@@ -170,7 +15,7 @@ void SetInitialPixie16Utilities(Pixie16Utilities *myUtils/*, vector<UShort_t> tr
 
 TRandom3 *random3 = new TRandom3();
 
-void analyze_dynode(int crateid, int slotid, int channum, vector<UShort_t> trace, betadecay *bdecay, betadecayvariables *bdecayv, int eventnum) {
+void analyze_dynode(int crateid, int slotid, int channum, vector<UShort_t> trace, betadecay *bdecay, betadecayvariables *bdecayv, int eventnum, Pixie16Utilities *utils[]) {
   //depending on what is hit, fill parameters
   //calibrate and threshold check
   double starttime;
@@ -191,31 +36,10 @@ void analyze_dynode(int crateid, int slotid, int channum, vector<UShort_t> trace
   //in first crate go from 0 to 207
   //ID
   //0 = dynode
-  //1 - 15 = LaBr3
-  //16 = Pin01
-  //17 = Pin02
-  //18 = Pin03
-  //19 = TAC1 : Pin01 - I2nTOF
-  //20 = TAC2 : Pin01 - I2sTOF
-  //21 = TAC3 : Pin02 - I2nTOF
-  //22 = TAC4 : Pin02 - I2sTOF
-  //23 = TAC5 : I2N-I2S 
-  //24 = TAC6 : Pin01-RF
-  //30 = I2N
-  //31 = I2S
-  //32 = CLYC1 (UMass Lowell)
-  //33 = CLYC2 (UMass Lowell)
-  //48 - 63 = SeGA
-  //64 - 319 = anodes (in rows from top to bottom)
   int id = (crateid * 208) + ((slotid - 2) * 16) + channum;
   int modnum = 0;
   if (crateid == 0) modnum = slotid - 2;
   if (crateid == 1) modnum = slotid + 11;
-
-  // if(crateid > 1 || slotid > 14 || channum > 15){
-  //   cout<<"ID problem in analyze_event"<<endl;
-  //   cout<<"Crate: "<<crateid<<" Slot: "<<slotid<<" Channel: "<<channum<<endl;
-  // }
 
   //array declaring the type of module:
   //0 = 100-12 (100 MSPS, 12 bit)
@@ -241,13 +65,7 @@ void analyze_dynode(int crateid, int slotid, int channum, vector<UShort_t> trace
   //use this for the max amplitude to use when determining overflows
   int maxsize[20]={16380,4090,16380,4090,16380,16380,16380,65530,65530,16380,16380,16380,16380,16380,16380,65530,65530,16380,16380,16380};
   
-  //Make the Utilities Function
   int retval=0;
-  //the above arrays can be used to reference the frequency
-  Pixie16Utilities *utils = new Pixie16Utilities();
-  int ModMSPS = mod_freq[modnum];
-  SetInitialPixie16Utilities(utils,ModMSPS,modnum);
-  
 
   //calculate trace analysis parameters
   double max, min, amplitude, area, baseline, amplitudecal, areacal, overflow = 0.0;
@@ -256,6 +74,9 @@ void analyze_dynode(int crateid, int slotid, int channum, vector<UShort_t> trace
   int maxPix = 0;
   int lo, high, loarea, hiarea, offset;
   //bounds for baseline determination
+
+  double ModMSPS = mod_freq[modnum];
+  
   if(trace.size() > 0){
     //  lo = 0;
     //  high = int(utils->GetTraceDelay() / (int(1000./ModMSPS)));
@@ -273,10 +94,10 @@ void analyze_dynode(int crateid, int slotid, int channum, vector<UShort_t> trace
     }
     
     //calculate trace properties
-    utils->CalculateBaseline_PR(trace,lo,high);
-    baseline = utils->GetBaseline();
-    utils->CalculateTraceAmplitude(trace);
-    amplitude = utils->GetTraceAmplitude();
+    utils[modnum]->CalculateBaseline_PR(trace,lo,high);
+    baseline = utils[modnum]->GetBaseline();
+    utils[modnum]->CalculateTraceAmplitude(trace);
+    amplitude = utils[modnum]->GetTraceAmplitude();
     //modify amplitude for differences in bit depth
     // cout << amplitude << " before scale, modnum = " << modnum << ", scale_fact = " << scale_fact[modnum] << endl;
     //amplitudecal = amplitude * scale_fact[modnum] + random3->Rndm();
@@ -284,16 +105,16 @@ void analyze_dynode(int crateid, int slotid, int channum, vector<UShort_t> trace
 
     // cout << amplitudecal << " after scale"<<endl;
     //get trace areas
-    loarea = int (utils->GetTraceDelay() / (int(1000./ModMSPS)));
+    loarea = int (utils[modnum]->GetTraceDelay() / (int(1000./ModMSPS)));
     offset = int (40. / (int(1000./ModMSPS)));
     hiarea = loarea + offset;
     
-    utils->CalculateTraceArea_PR(trace,loarea,hiarea);
-    area = utils->GetTraceArea();
+    utils[modnum]->CalculateTraceArea_PR(trace,loarea,hiarea);
+    area = utils[modnum]->GetTraceArea();
     areacal = area * scale_fact[modnum];
     
-    utils->CheckOverflowUnderflow(trace,5,maxsize[modnum]);  //cheating, 16 modules are running with low amplitude sinals so all should be fairly small
-    overflow = utils->GetOverflow();
+    utils[modnum]->CheckOverflowUnderflow(trace,5,maxsize[modnum]);  //cheating, 16 modules are running with low amplitude sinals so all should be fairly small
+    overflow = utils[modnum]->GetOverflow();
   }
 
   /////////////////////////////
@@ -310,19 +131,17 @@ void analyze_dynode(int crateid, int slotid, int channum, vector<UShort_t> trace
 
     //set initial dynode parameters
     //check if we have already set it
-    if(amplitude > bdecay->pspmt.dyamp){
-      bdecay->pspmt.dyenergy = bdecay->adc[adcnumber].channel[channum]; //Pixie energy
-      bdecay->pspmt.dyecal = bdecay->adc[adcnumber].channel[channum] + random3->Rndm();
-
-      bdecay->pspmt.dytime = bdecay->time[adcnumber].timefull[channum]; //time
-
-      bdecay->pspmt.dyamp = amplitude;
-      bdecay->pspmt.dyampcal = amplitudecal;
-      bdecay->pspmt.dyarea = area;
-      bdecay->pspmt.dyareacal = areacal;
-      bdecay->pspmt.dyeventtdc = (currenttime - starttime) + 3000.;
-      
-    }
+    
+    bdecay->pspmt.dyenergy = bdecay->adc[adcnumber].channel[channum]; //Pixie energy
+    bdecay->pspmt.dyecal = bdecay->adc[adcnumber].channel[channum] + random3->Rndm();
+    bdecay->pspmt.dytime = bdecay->time[adcnumber].timefull[channum]; //time
+    
+    bdecay->pspmt.dyamp = amplitude;
+    bdecay->pspmt.dyampcal = amplitudecal;
+    bdecay->pspmt.dyarea = area;
+    bdecay->pspmt.dyareacal = areacal;
+    bdecay->pspmt.dyeventtdc = (currenttime - starttime) + 3000.;
+    
     //set overflows to have a high energy
     if(bdecay->pspmt.dyoverflow == 1){
       bdecay->pspmt.dyenergy = 99999;
@@ -331,13 +150,11 @@ void analyze_dynode(int crateid, int slotid, int channum, vector<UShort_t> trace
     }
     
   } //end of dynode processing (id = 0)  
-    
-  utils->Delete();
-  
+      
 }
 
 
-void analyze_event(int crateid, int slotid, int channum, vector<UShort_t> trace, betadecay *bdecay, betadecayvariables *bdecayv, int eventnum) {
+void analyze_event(int crateid, int slotid, int channum, vector<UShort_t> trace, betadecay *bdecay, betadecayvariables *bdecayv, int eventnum, Pixie16Utilities *utils[]) {
   //depending on what is hit, fill parameters
   //calibrate and threshold check
   double starttime;
@@ -411,9 +228,9 @@ void analyze_event(int crateid, int slotid, int channum, vector<UShort_t> trace,
   //Make the Utilities Function
   int retval=0;
   //the above arrays can be used to reference the frequency
-  Pixie16Utilities *utils = new Pixie16Utilities();
+  //Pixie16Utilities *utils = new Pixie16Utilities();
   int ModMSPS = mod_freq[modnum];
-  SetInitialPixie16Utilities(utils,ModMSPS,modnum);
+  //SetInitialPixie16Utilities(utils,ModMSPS,modnum);
   
 
   //calculate trace analysis parameters
@@ -437,10 +254,11 @@ void analyze_event(int crateid, int slotid, int channum, vector<UShort_t> trace,
     }
     
     //calculate trace properties
-    utils->CalculateBaseline_PR(trace,lo,high);
-    baseline = utils->GetBaseline();
-    utils->CalculateTraceAmplitude(trace);
-    amplitude = utils->GetTraceAmplitude();
+    // cout<<modnum<<"  "<<lo<<"  "<<high<<"  "<<utils[modnum]->GetTraceDelay()<<endl;
+    utils[modnum]->CalculateBaseline_PR(trace,lo,high);
+    baseline = utils[modnum]->GetBaseline();
+    utils[modnum]->CalculateTraceAmplitude(trace);
+    amplitude = utils[modnum]->GetTraceAmplitude();
     //modify amplitude for differences in bit depth
     // cout << amplitude << " before scale, modnum = " << modnum << ", scale_fact = " << scale_fact[modnum] << endl;
     //amplitudecal = amplitude * scale_fact[modnum] + random3->Rndm();
@@ -448,16 +266,16 @@ void analyze_event(int crateid, int slotid, int channum, vector<UShort_t> trace,
 
     // cout << amplitudecal << " after scale"<<endl;
     //get trace areas
-    loarea = int (utils->GetTraceDelay() / (int(1000./ModMSPS)));
+    loarea = int (utils[modnum]->GetTraceDelay() / (int(1000./ModMSPS)));
     offset = int (40. / (int(1000./ModMSPS)));
     hiarea = loarea + offset;
     
-    utils->CalculateTraceArea_PR(trace,loarea,hiarea);
-    area = utils->GetTraceArea();
+    utils[modnum]->CalculateTraceArea_PR(trace,loarea,hiarea);
+    area = utils[modnum]->GetTraceArea();
     areacal = area * scale_fact[modnum];
     
-    utils->CheckOverflowUnderflow(trace,5,maxsize[modnum]);  //cheating, 16 modules are running with low amplitude sinals so all should be fairly small
-    overflow = utils->GetOverflow();
+    utils[modnum]->CheckOverflowUnderflow(trace,5,maxsize[modnum]);  //cheating, 16 modules are running with low amplitude sinals so all should be fairly small
+    overflow = utils[modnum]->GetOverflow();
   }
 
   /////////////////////////////
@@ -831,8 +649,9 @@ void analyze_event(int crateid, int slotid, int channum, vector<UShort_t> trace,
     bdecay->pspmt.ratio[pix] = (baseline-min)/max;
     bdecay->pspmt.amult_raw += 1;
 
-
-    if(TMath::Abs(bdecay->time[adcnumber].timefull[channum] - bdecay->pspmt.dytime) < 100) {
+    double anode_time_corrected = bdecay->time[adcnumber].timefull[channum] - bdecayv->pspmt.time_deviation[pix];
+    
+    if((TMath::Abs(anode_time_corrected - bdecay->pspmt.dytime) < 100) && (bdecay->adc[adcnumber].channel[channum] < bdecayv->pspmt.uld[pix]) ) {
     
       if(!bdecay->pspmt.ahit[pix]){
 	bdecay->pspmt.ahit[pix] = 1;
@@ -843,48 +662,55 @@ void analyze_event(int crateid, int slotid, int channum, vector<UShort_t> trace,
 	bdecay->pspmt.aampcal[pix] = amplitudecal;
 	bdecay->pspmt.aarea[pix] = area;
 	bdecay->pspmt.aareacal[pix] = areacal;
-	bdecay->pspmt.atime[pix] = bdecay->time[adcnumber].timefull[channum];
+	bdecay->pspmt.atime[pix] = anode_time_corrected;
 	bdecay->pspmt.amult += 1;
       }
-    }
-    //cout << bdecay->adc[adcnumber].channel[channum] << " " << bdecay->pspmt.aenergy[pix] << endl;
-    //bdecay->pspmt.aenergy[pix] = bdecay->adc[adcnumber].channel[channum];
-    //cout<<"pix: "<<pix<<" pspmt.aenergy: "<<bdecay->pspmt.aenergy[pix];
     
-    
-    bdecay->pspmt.pixmult[pix] = bdecay->pspmt.pixmult[pix] + 1;
+      //cout << bdecay->adc[adcnumber].channel[channum] << " " << bdecay->pspmt.aenergy[pix] << endl;
+      //bdecay->pspmt.aenergy[pix] = bdecay->adc[adcnumber].channel[channum];
+      //cout<<"pix: "<<pix<<" pspmt.aenergy: "<<bdecay->pspmt.aenergy[pix];
+      
+      bdecay->pspmt.pixmult[pix] = bdecay->pspmt.pixmult[pix] + 1;
 
-    //set max using scaled amplitudes so bit depth doesn't
-    //alter the idea of what is large or small
-    if(bdecay->pspmt.aecal[pix] > bdecay->pspmt.amax){
-      bdecay->pspmt.amax = bdecay->pspmt.aecal[pix];
-      bdecay->pspmt.amaxx = xpix;
-      bdecay->pspmt.amaxy = ypix;
-      bdecay->pspmt.amaxtime = bdecay->time[adcnumber].timefull[channum];
-    }
-    if(bdecay->pspmt.aampcal[pix] > bdecay->pspmt.aampmaxcal){
-      bdecay->pspmt.aampmax = bdecay->pspmt.aamp[pix];
-      bdecay->pspmt.aampmaxcal = bdecay->pspmt.aampcal[pix];
-      bdecay->pspmt.aampmaxx = xpix;
-      bdecay->pspmt.aampmaxy = ypix;
-      bdecay->pspmt.aampmaxtime = bdecay->time[adcnumber].timefull[channum];
-    }
-    if(bdecay->pspmt.aareacal[pix] > bdecay->pspmt.aareamax){
-      bdecay->pspmt.aareamax = bdecay->pspmt.aareacal[pix];
-      bdecay->pspmt.aareamaxx = xpix;
-      bdecay->pspmt.aareamaxy = ypix;
-      bdecay->pspmt.aareamaxtime = bdecay->time[adcnumber].timefull[channum];
-    }
-    
-    // int anode_threshold = 30000; //for pixieE
-    // if(bdecay->pspmt.aecal[i] > 0 && bdecay->pspmt.aecal[i] < anode_threshold){
-    //   if(bdecay->pspmt.aecal[i] > bdecay->pspmt.amaxcent){
-    // 	bdecay->pspmt.amaxcent = bdecay->pspmt.aecal[i];
-    //   }
-    // }
-    
-    // } // end requirement of the first trigger from this channel in the event
-  }
+      //set max using scaled amplitudes so bit depth doesn't
+      //alter the idea of what is large or small
+      
+      if(bdecay->pspmt.aecal[pix] > bdecay->pspmt.amax){
+	bdecay->pspmt.amax = bdecay->pspmt.aecal[pix];
+	bdecay->pspmt.amaxx = xpix;
+	bdecay->pspmt.amaxy = ypix;
+	bdecay->pspmt.amaxtime = bdecay->time[adcnumber].timefull[channum];
+      }
+      if(bdecay->pspmt.aecal[pix] < bdecay->pspmt.amin){
+	bdecay->pspmt.amin = bdecay->pspmt.aecal[pix];
+	bdecay->pspmt.aminx = xpix;
+	bdecay->pspmt.aminy = ypix;
+	bdecay->pspmt.amintime = bdecay->time[adcnumber].timefull[channum];
+      }
+      if(bdecay->pspmt.aampcal[pix] > bdecay->pspmt.aampmaxcal){
+	bdecay->pspmt.aampmax = bdecay->pspmt.aamp[pix];
+	bdecay->pspmt.aampmaxcal = bdecay->pspmt.aampcal[pix];
+	bdecay->pspmt.aampmaxx = xpix;
+	bdecay->pspmt.aampmaxy = ypix;
+	bdecay->pspmt.aampmaxtime = bdecay->time[adcnumber].timefull[channum];
+      }
+      if(bdecay->pspmt.aareacal[pix] > bdecay->pspmt.aareamax){
+	bdecay->pspmt.aareamax = bdecay->pspmt.aareacal[pix];
+	bdecay->pspmt.aareamaxx = xpix;
+	bdecay->pspmt.aareamaxy = ypix;
+	bdecay->pspmt.aareamaxtime = bdecay->time[adcnumber].timefull[channum];
+      }
+      
+      // int anode_threshold = 30000; //for pixieE
+      // if(bdecay->pspmt.aecal[i] > 0 && bdecay->pspmt.aecal[i] < anode_threshold){
+      //   if(bdecay->pspmt.aecal[i] > bdecay->pspmt.amaxcent){
+      // 	bdecay->pspmt.amaxcent = bdecay->pspmt.aecal[i];
+      //   }
+      // }
+      
+      // } // end requirement of the first trigger from this channel in the event
+    } //end of time check with dynode
+  } //end of anodes
 
   //pulser test
   if(id == 44){
@@ -899,9 +725,7 @@ void analyze_event(int crateid, int slotid, int channum, vector<UShort_t> trace,
     
   }
   
-    
-  utils->Delete();
-  
+ 
 }
 
 

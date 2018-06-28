@@ -29,9 +29,11 @@ class IMPLANT
   long imax;  /* Total implant energy (from max) */
   long tof;   /* Time of flight */
   double dt;    /* Time since last implant */
+  double dyecal; /* pixie16 energy of dynode*/
+  double dyamp; /* trace amplitude for dynode */
+
   // from spectcl
   double asum;
-  double dyecal;
   double amax;  /* Total implant energy (from max) */
   double amaxx;  /* Total implant energy (from max) */
   double amaxy;  /* Total implant energy (from max) */
@@ -62,6 +64,7 @@ class DECAY
   // from spectcl
   double asum;
   double dyecal;
+  double dyamp;
   double amax;  /* Total implant energy (from max) */
   double amaxx;  /* Total implant energy (from max) */
   double amaxy;  /* Total implant energy (from max) */

@@ -16,7 +16,7 @@
 
 #include "correlator.h"
 
-#define CORRELATION 3
+#define CORRELATION 7
 
 /****************************************
  * Correlation flags:                   *
@@ -59,7 +59,11 @@ void Correlator::Reset() {
       implant[i][j].imax = 0;
       implant[i][j].tof = 0;
       implant[i][j].dt = 0;
+      implant[i][j].dyecal = 0;
+      implant[i][j].dyamp = 0;
       
+      decay[i][j].dyamp = 0;
+      decay[i][j].dyecal = 0;
       decay[i][j].timehigh = 0;
       decay[i][j].timelow = 0;
       decay[i][j].timecfd = 0;
@@ -75,7 +79,6 @@ void Correlator::Reset() {
     }
   }
 }
-
 
 double Correlator::Correlate(betadecay &bdecay, betadecayvariables &bdecayv,
 			     int numX = 16, int numY = 16, int subseg = -1) {
@@ -160,7 +163,7 @@ double Correlator::Correlate(betadecay &bdecay, betadecayvariables &bdecayv,
   //also putting a cut on dynode energy to throw out what appear to be
   //light ions (this hopefully is just a temporary fix since we
   //lose ~20% of ions right off the bat
-  if(!hasPin && hasPspmt && !overflowPSPMT && bdecay.pspmt.dyamp < 6000) {
+  if(!hasPin && hasPspmt && !overflowPSPMT /*&& bdecay.pspmt.dyamp < 6000*/) {
     isDecay = true; 
   }
   //CHANGE THIS after PIN03 gain increased
@@ -195,8 +198,19 @@ double Correlator::Correlate(betadecay &bdecay, betadecayvariables &bdecayv,
       // xPos = bdecay.pspmt.aampmaxx;//(int)((bdecay.pspmt.loposxEcent50-1)*2.0 + 0.5) +1;
       // yPos  = bdecay.pspmt.aampmaxy;//(int)((bdecay.pspmt.loposyEcent50-1)*2.0 + 0.5) +1;
 
-      xPos = bdecay.pspmt.amaxxcal;//(int)((bdecay.pspmt.loposxEcent50-1)*2.0 + 0.5) +1;
-      yPos  = bdecay.pspmt.amaxycal;//(int)((bdecay.pspmt.loposyEcent50-1)*2.0 + 0.5) +1;
+      xPos = bdecay.pspmt.aminx;//(int)((bdecay.pspmt.loposxEcent50-1)*2.0 + 0.5) +1;
+      yPos  = bdecay.pspmt.aminy;//(int)((bdecay.pspmt.loposyEcent50-1)*2.0 + 0.5) +1;
+      
+      cout << "IMPLANT array " << xPos << " " << yPos << " " << currentTime << " " << bdecay.pin01.energy <<endl;
+      for(int y = 0; y<16; y++){
+          for(int x= 0; x<16; x++){
+            cout << std::setw(10) << implant[x][y].time / 1000000. << " " ;//" (" <<  std::setw(7) << tdiff[x][y][m] << ")";
+          }
+          cout << endl;
+      }
+
+      cout << endl;
+
       
        
       // sanity check on position
@@ -220,6 +234,7 @@ double Correlator::Correlate(betadecay &bdecay, betadecayvariables &bdecayv,
 	    implant[xPos][yPos].tof = bdecay.pid.i2stof;
 	    // anode and dynode
 	    implant[xPos][yPos].dyecal = bdecay.pspmt.dyecal;
+	    implant[xPos][yPos].dyamp = bdecay.pspmt.dyamp;
 	    implant[xPos][yPos].asum = bdecay.pspmt.asum; 
 	    // 
 	    implant[xPos][yPos].dE1 = bdecay.pid.de1;
@@ -242,14 +257,31 @@ double Correlator::Correlate(betadecay &bdecay, betadecayvariables &bdecayv,
 	    bdecay.corr.itof  = implant[xPos][yPos].tof;
 	    bdecay.corr.iasum = implant[xPos][yPos].asum;
 	    bdecay.corr.idyecal = implant[xPos][yPos].dyecal;
+	    bdecay.corr.idyamp = implant[xPos][yPos].dyamp;
+
+
+	    cout << "UPDATED IMPLANT array " << endl;
+	    for(int y = 0; y<16; y++){
+	      for(int x= 0; x<16; x++){
+		cout << std::setw(10) << implant[x][y].time /1000000. << " " ;//" (" <<  std::setw(7) << tdiff[x][y][m] << ")";
+	      }
+	      cout << endl;
+	    }
+	    
+	    cout << endl;
+
+
 	    
 	  } else condition = 24; // bad implant time; 
 	} else timeDiffIon = -1; 
       } // end:if(goodPos)
     }else if(isDecay) {
       // get position info., from high gain info.
-      xPos = bdecay.pspmt.amaxxcal;//(int)((bdecay.pspmt.posxEcent-1)*2.0 + 0.5)+1;
-      yPos  = bdecay.pspmt.amaxycal;//(int)((bdecay.pspmt.posyEcent-1)*2.0 + 0.5)+1;
+      xPos = bdecay.pspmt.amaxx;//(int)((bdecay.pspmt.posxEcent-1)*2.0 + 0.5)+1;
+      yPos  = bdecay.pspmt.amaxy;//(int)((bdecay.pspmt.posyEcent-1)*2.0 + 0.5)+1;
+      cout << "DECAY INFO " << xPos << " " << yPos << " " << currentTime << endl;
+      //if(currentTime > 535.357) exit(1);
+      
 
       //search around position for correlation
       double decay_pixel[CORRELATION][CORRELATION];
@@ -258,7 +290,7 @@ double Correlator::Correlate(betadecay &bdecay, betadecayvariables &bdecayv,
       // reset the temporary array with very large times
       for (int i=0; i<CORRELATION; i++) {
 	for (int j=0; j<CORRELATION; j++) {
-	  decay_pixel[i][j] = DBL_MAX;
+	  decay_pixel[i][j] = 1000000000.;//DBL_MAX;
 	}
       }
       
@@ -284,7 +316,18 @@ double Correlator::Correlate(betadecay &bdecay, betadecayvariables &bdecayv,
       
       int tempxpos = 500;
       int tempypos = 500;
-      
+
+      cout << "TEMP CORR array " << xPos << " " << yPos << " " <<endl;
+      if ( (xPos!=500 && yPos !=500)){
+	cout <<  currentTime -  implant[xPos][yPos].time << endl;
+	for(int y = 0; y<7; y++){
+          for(int x= 0; x<7; x++){
+            cout << std::setw(11) << decay_pixel[x][y] << " " ;//" (" <<  std::setw(7) << tdiff[x][y][m] << ")";
+          }
+          cout << endl;
+	}
+      }
+      cout << endl;     
       
       if (implanted) {
 	for (int i=(-corr_limit); i<(corr_limit+1); i++) {
@@ -312,6 +355,18 @@ double Correlator::Correlate(betadecay &bdecay, betadecayvariables &bdecayv,
       
       xPos = tempxpos;
       yPos = tempypos;
+
+
+      cout << "DECAY array " << xPos << " " << yPos << " " <<endl;
+      if ( (xPos!=500 && yPos !=500)) cout <<  currentTime - implant[xPos][yPos].time << endl;
+      for(int y = 0; y<16; y++){
+          for(int x= 0; x<16; x++){
+            cout << std::setw(7) << currentTime - implant[x][y].time << " " ;//" (" <<  std::setw(7) << tdiff[x][y][m] << ")";
+          }
+          cout << endl;
+      }
+
+      cout << endl;
       
       
       // sanity check on position
@@ -334,7 +389,8 @@ double Correlator::Correlate(betadecay &bdecay, betadecayvariables &bdecayv,
 	  decay[xPos][yPos].time = currentTime;
 	  // dynode and anode
 	  decay[xPos][yPos].asum = bdecay.pspmt.asum;
-	  decay[xPos][yPos].dyecal = bdecay.pspmt.dyamp;
+	  decay[xPos][yPos].dyecal = bdecay.pspmt.dyecal;
+	  decay[xPos][yPos].dyamp = bdecay.pspmt.dyamp;
 	  // related to ions
 	  decay[xPos][yPos].dt   = ionDecayTDiff;
 	  decay[xPos][yPos].dE1  = implant[xPos][yPos].dE1;
@@ -344,6 +400,8 @@ double Correlator::Correlate(betadecay &bdecay, betadecayvariables &bdecayv,
 	  decay[xPos][yPos].isum = implant[xPos][yPos].isum;
 	  decay[xPos][yPos].imax = implant[xPos][yPos].imax;
 	  decay[xPos][yPos].tof  = implant[xPos][yPos].tof;
+	  //decay[xPos][yPos].idyecal  = implant[xPos][yPos].dyecal;
+	  //decay[xPos][yPos].idyamp  = implant[xPos][yPos].dyamp;
 	  // decay[xPos][yPos].decaydt = decaydt;
 	  decay[xPos][yPos].dnumcorr++;
 	  /*if(ionDecayTDiff > tDiffCorrCut)*/
@@ -358,10 +416,12 @@ double Correlator::Correlate(betadecay &bdecay, betadecayvariables &bdecayv,
 	  bdecay.corr.dde3     = decay[xPos][yPos].dE3;
 	  bdecay.corr.disum    = decay[xPos][yPos].isum;
 	  bdecay.corr.dimax    = decay[xPos][yPos].imax;
+	  bdecay.corr.dyecal   = decay[xPos][yPos].dyecal;
+	  bdecay.corr.dyamp   = decay[xPos][yPos].dyamp;
+	  bdecay.corr.didyecal   = implant[xPos][yPos].dyecal;
 	  bdecay.corr.didyecal   = implant[xPos][yPos].dyecal;
 	  bdecay.corr.dtof     = decay[xPos][yPos].tof;
 	  bdecay.corr.dnumcorr = decay[xPos][yPos].dnumcorr;
-	  bdecay.corr.dyecal   = decay[xPos][yPos].dyecal;
 	  // pos. info.
 	  bdecay.corr.implantX = xPos;
 	  bdecay.corr.implantY = yPos;

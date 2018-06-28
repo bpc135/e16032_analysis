@@ -12,8 +12,6 @@
 
 using namespace std;
 
-void SetInitialPixie16Utilities(Pixie16Utilities *myUtils, vector<UShort_t> tr);
-
-void analyze_event(int crateid, int slotid, int channum, vector<UShort_t> trace, betadecay *bdecay, betadecayvariables *bdecayv, int eventnum);
-void analyze_dynode(int crateid, int slotid, int channum, vector<UShort_t> trace, betadecay *bdecay, betadecayvariables *bdecayv, int eventnum);
+void analyze_event(int crateid, int slotid, int channum, vector<UShort_t> trace, betadecay *bdecay, betadecayvariables *bdecayv, int eventnum, Pixie16Utilities *utils[]);
+void analyze_dynode(int crateid, int slotid, int channum, vector<UShort_t> trace, betadecay *bdecay, betadecayvariables *bdecayv, int eventnum, Pixie16Utilities *utils[]);
 #endif

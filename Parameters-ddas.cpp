@@ -384,7 +384,12 @@ void bdecayCorr::Reset()
   iimax = -1;
   itof = -1;
   iasum = -1; // yx
+  dyecal = -1; // yx
+  dyamp = -1; // yx
   idyecal = -1; // yx
+  idyamp = -1; // yx
+  didyecal = -1; // yx
+  didyamp = -1; // yx
   //
   gtimecal = -1;
   gtime = -1;
@@ -555,6 +560,7 @@ void bdecayPSPMT::Reset()
   memset(atime,0,257*sizeof(double));
   memset(aoverflow,0,257*sizeof(double));
   memset(atdiff,0,257*sizeof(double));
+  memset(atdiffmin,0,257*sizeof(double));
   memset(aeventtdc,0,257*sizeof(double));
 
   memset(aamp,0,257*sizeof(double));
@@ -589,7 +595,9 @@ void bdecayPSPMT::Reset()
   dyareacal = -1;
   dyoverflow = -1;
   dytime = 0;
+  dytimemin = 0;
   dytdiff = 0;
+  dytdiffmin = 0;
   dyeventtdc = -1;
 
   testsig = -1;
@@ -622,12 +630,16 @@ void bdecayPSPMT::Reset()
   asumcent = -1;
   asumcent50 = -1;
   amax = 0;
+  amin = DBL_MAX;
   amaxcent = 0;
   amult = 0;
   amult_raw = 0;
   amaxx = 0;
   amaxy = 0;
+  aminx = 0;
+  aminy = 0;
   amaxtime = 0;
+  amintime = 0;
   aoverflowcount = 0;
   posxEcent = -1;
   posyEcent = -1;
