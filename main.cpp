@@ -39,6 +39,8 @@
 #include "DDASRootFitEvent.h"
 #include "DDASRootFitHit.h"
 #include "DDASFitHit.h"
+#include "functions.h"
+#include "lmfit.h"
 
 //#include "Variables-ddas.h"
 #include "Cuts.h"

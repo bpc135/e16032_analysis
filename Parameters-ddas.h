@@ -409,6 +409,9 @@ class bdecayPSPMT: public TObject
   double dyoffset_single;
   double dyE1_steepness_single; 
   double dyE1_decayTime_single;
+  double dyE1real_single;
+  double dyE1real_double;
+  double dyE2real_double;
 
   double testsig;
   double testamp;
@@ -425,6 +428,7 @@ class bdecayPSPMT: public TObject
   double atime[257];
   double amax;
   double amin;
+  double aminimp;
   double amaxcal;
   double amincal;
   double atdiff[257];
@@ -436,6 +440,8 @@ class bdecayPSPMT: public TObject
   int amaxy;
   int aminx;
   int aminy;
+  int aminimpx;
+  int aminimpy;
   double amaxtime;
   double amintime;
   double posxEcent;

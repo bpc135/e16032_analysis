@@ -14,6 +14,8 @@
 #include <TTreeReader.h>
 #include <TTreeReaderValue.h>
 #include <TTreeReaderArray.h>
+#include <TMath.h>
+#include "Parameters-ddas.h"
 
 // Headers needed by this particular selector
 
@@ -22,7 +24,8 @@ class MySelector : public TSelector {
 public :
    TTreeReader     fReader;  //!the tree reader
    TTree          *fChain = 0;   //!pointer to the analyzed TTree or TChain
-
+   int             counter;
+   
    // Readers to access the data (delete the ones you do not need).
    TTreeReaderValue<unsigned int> fUniqueID = {fReader, "fUniqueID"};
    TTreeReaderValue<unsigned int> fBits = {fReader, "fBits"};
@@ -410,7 +413,10 @@ public :
    virtual TList  *GetOutputList() const { return fOutput; }
    virtual void    SlaveTerminate();
    virtual void    Terminate();
-
+   double          logistic(double A, double k, double x1, double x);
+   double          decay(double A, double k, double x1, double x);
+   double          singlePulse(double A1, double k1, double k2, double x1, double C, double x
+);
    ClassDef(MySelector,0);
 
 };
@@ -440,6 +446,5 @@ Bool_t MySelector::Notify()
 
    return kTRUE;
 }
-
 
 #endif // #ifdef MySelector_cxx

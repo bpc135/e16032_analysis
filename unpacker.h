@@ -7,6 +7,7 @@
 #include "DDASRootFitEvent.h"
 #include "DDASRootFitHit.h"
 #include "DDASFitHit.h"
+#include "lmfit.h"
 
 //File Includes
 #include "Parameters-ddas.h"

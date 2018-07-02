@@ -6,7 +6,9 @@
 #include "unpacker.h"
 #include "correlator.h"
 #include "analyzer.h"
-
+extern "C" {
+#include "functions.h"
+}
 
 //define the utilities for the various modules
 void SetInitialPixie16Utilities(Pixie16Utilities *myUtils/*, vector<UShort_t> tr*/, int adcfreq, int modnum){
@@ -319,6 +321,7 @@ int unpack_data(TTree *tree_in, TTree *tree_out, string Run_Number  ) {
   //RawHits
   DDASRootFitEvent *rawhits;
   //nevents = 100;
+  int double_events = 0;
 
   //Loop over all the events in the file
   for (Int_t ii=0; ii<nevents; ii++) {
@@ -373,6 +376,15 @@ int unpack_data(TTree *tree_in, TTree *tree_out, string Run_Number  ) {
     unpack_event(ii,&bdecay,&bdecayv,channellist,channellist_it, &utils[0]);
 
     unpack_double_pulse(ii,&bdecay,fitdata);
+
+    //print some double pulse stuff
+    // if(double_events < 20){
+    //   if(bdecay.pspmt.dychisq_double < 3000 && bdecay.pspmt.dychisq_single > 30000){
+    // 	cout << "A1 = " << bdecay.pspmt.dyE1_double << ", st1 = " << bdecay.pspmt.dyE1_steepness_double << ", tau1 = " << bdecay.pspmt.dyE1_decayTime_double << ", pos1 = " << bdecay.pspmt.dyT1_double << " \t A2 = " << bdecay.pspmt.dyE2_double << ", st2 = " << bdecay.pspmt.dyE2_steepness_double << ", tau2 = " << bdecay.pspmt.dyE2_decayTime_double << ", pos2 = " << bdecay.pspmt.dyT2_double << endl;
+    // 	cout << "A1real = " << bdecay.pspmt.dyE1real_double << " \t A2real = " << bdecay.pspmt.dyE2real_double << endl;
+    // 	double_events++;
+    //   }
+    // }
   
     //Reset root output
     rootout->Reset();
@@ -626,7 +638,7 @@ int unpack_event(int eventnum, betadecay *bdecay, betadecayvariables *bdecayv,ve
 	bdecay->pspmt.atdiff[i] = bdecay->pspmt.dytime - bdecay->pspmt.atime[i];
 	bdecay->pspmt.atdiffmin[i] = bdecay->pspmt.dytimemin - bdecay->pspmt.atime[i];
       }
-      //just set it to something at wont matter
+      //just set it to something that wont matter
       else {
 	bdecay->pspmt.atdiff[i] = 123456.78;
 	bdecay->pspmt.atdiffmin[i] = 876543.21;
@@ -741,6 +753,19 @@ int unpack_event(int eventnum, betadecay *bdecay, betadecayvariables *bdecayv,ve
 	bdecay->pspmt.posyareacent50 += ypix * bdecay->pspmt.aareacal[i];
 	aareasumcent50 += bdecay->pspmt.aareacal[i];
       }
+
+      //calculate the implant position using pin01 > 9000 and a threshold for considering
+      //the position at 20% of the maximum energy
+      if(bdecay->pin01.energy > 9000 && bdecay->pspmt.amult > 0){
+	if(bdecay->pspmt.aecal[i] > 0.2*bdecay->pspmt.amaxcent){
+	  if(bdecay->pspmt.aecal[i] < bdecay->pspmt.aminimp){
+	    bdecay->pspmt.aminimp = bdecay->pspmt.aecal[i];
+	    bdecay->pspmt.aminimpx = xpix;
+	    bdecay->pspmt.aminimpy = ypix;
+	  }
+	}
+      }
+      
     }
   }
 
@@ -851,6 +876,8 @@ int unpack_event(int eventnum, betadecay *bdecay, betadecayvariables *bdecayv,ve
     bdecay->pspmt.loposxareacent50 = bdecay->pspmt.loposxareacent50 / loaareasum50;
     bdecay->pspmt.loposyareacent50 = bdecay->pspmt.loposyareacent50 / loaareasum50;
 
+    
+
 
     //relic from e14057: leaving as a reminder that looking at ratios of areas to amplitudes can
     //help understand the overflows
@@ -941,6 +968,13 @@ void unpack_double_pulse(int eventnum,  betadecay *bdecay, vector <RootHitExtens
       bdecay->pspmt.dychisq_double = fit2.chiSquare;
       bdecay->pspmt.dyoffset_double = fit2.offset;
       bdecay->pspmt.dytdiffE1E2 = bdecay->pspmt.dyT2_double - bdecay->pspmt.dyT1_double;
+
+      //calculate real amplitudes
+      //double retval = DDAS::pulseAmplitude(1.0,1.0,1.0,1.0);
+      bdecay->pspmt.dyE1real_single = DDAS::pulseAmplitude(bdecay->pspmt.dyE1_single,bdecay->pspmt.dyE1_steepness_single,bdecay->pspmt.dyE1_decayTime_single,bdecay->pspmt.dyoffset_single);
+      bdecay->pspmt.dyE1real_double = DDAS::pulseAmplitude(bdecay->pspmt.dyE1_double,bdecay->pspmt.dyE1_steepness_double,bdecay->pspmt.dyE1_decayTime_double,bdecay->pspmt.dyoffset_double);
+      bdecay->pspmt.dyE2real_double = DDAS::pulseAmplitude(bdecay->pspmt.dyE2_double,bdecay->pspmt.dyE2_steepness_double,bdecay->pspmt.dyE2_decayTime_double,bdecay->pspmt.dyoffset_double);
+      
       
     }
   }

@@ -674,6 +674,11 @@ void analyze_event(int crateid, int slotid, int channum, vector<UShort_t> trace,
 
       //set max using scaled amplitudes so bit depth doesn't
       //alter the idea of what is large or small
+
+      //the implants appear to have the best reproduced positions if you use a minimum pixel with
+      //a threshold. This will need to be done properly at the event level.  I'm leaving
+      //amin, aminx, and aminy here in case we want them for something late, but be careful
+      //not to use these for positions directly. The "dead" pixels complicate using a strict minimum.
       
       if(bdecay->pspmt.aecal[pix] > bdecay->pspmt.amax){
 	bdecay->pspmt.amax = bdecay->pspmt.aecal[pix];

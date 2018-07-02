@@ -624,13 +624,17 @@ void bdecayPSPMT::Reset()
   dyoffset_single = -1;
   dyE1_steepness_single = -1; 
   dyE1_decayTime_single = -1;
-
+  dyE1real_single = -1;
+  dyE1real_double = -1;
+  dyE2real_double = -1;
+  
   //anode
   asum = -1;
   asumcent = -1;
   asumcent50 = -1;
   amax = 0;
   amin = DBL_MAX;
+  aminimp = DBL_MAX;
   amaxcent = 0;
   amult = 0;
   amult_raw = 0;
@@ -638,6 +642,8 @@ void bdecayPSPMT::Reset()
   amaxy = 0;
   aminx = 0;
   aminy = 0;
+  aminimpx = 0;
+  aminimpy = 0;
   amaxtime = 0;
   amintime = 0;
   aoverflowcount = 0;
