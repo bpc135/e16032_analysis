@@ -334,7 +334,7 @@ int unpack_data(TTree *tree_in, TTree *tree_out, string Run_Number  ) {
     //cout << "Events processed " << ii << " - percent done " << (int)(ii/tenthper)*0.1 << "%"<<endl;
     //}
     //check with only 1% of the file
-    //  if( (ii > 0) && (ii % fiveper) == 0) {
+    // if( (ii > 0) && (ii % fiveper) == 0) {
     //   break;
     // }
 
@@ -482,6 +482,25 @@ int unpack_event(int eventnum, betadecay *bdecay, betadecayvariables *bdecayv,ve
 	adcnumber = slotid + 12;
       }
 
+      //fill arrays with dynode hits (similar to double pulses but slightly longer than traces)
+      if(bdecay->pspmt.dymult < 10){
+	
+	utils[0]->CalculateBaseline_PR((*channellist_it)->GetTrace(),0,Int_t ( 150. / 2));
+	double baseline = utils[0]->GetBaseline();
+	utils[0]->CalculateTraceAmplitude((*channellist_it)->GetTrace());
+
+	//don't fill if light ions are involved
+	//if(utils[0]->GetTraceAmplitude() < 6000){
+	  bdecay->pspmt.dyamps[bdecay->pspmt.dymult] = utils[0]->GetTraceAmplitude();
+	  bdecay->pspmt.dyenergies[bdecay->pspmt.dymult] = (*channellist_it)->energy;
+	  bdecay->pspmt.dytimes[bdecay->pspmt.dymult] = ((*channellist_it)->time);
+	
+	  bdecay->pspmt.dymult++; //increment dymult AFTER using it above
+	  //}
+      }else{
+	cout << "More than 10 dynode triggers in an event!!!" << endl;
+      }
+      
       if(!bdecayv->hit.dynode) {
 
 	bdecayv->hit.dynode = 1;
@@ -499,9 +518,16 @@ int unpack_event(int eventnum, betadecay *bdecay, betadecayvariables *bdecayv,ve
 	analyze_dynode(crateid, slotid, channum, (*channellist_it)->GetTrace(), bdecay, bdecayv, eventnum, &utils[0]);
       }
     } //end check on dynode hit
+
   } //End loop over channel list for looking at dynodes
 
-
+  // print out multi hit dynodes
+  // if(bdecay->pspmt.dymult > 1){
+  //   cout << "dymult = " << bdecay->pspmt.dymult << endl;
+  //   for (int eye = 0; eye < bdecay->pspmt.dymult; eye++ ){
+  //     cout << "dyamps[" << eye << "] = " << bdecay->pspmt.dyamps[eye] << endl;
+  //   }
+  // }
   
   
   for (channellist_it = channellist.begin(); channellist_it < channellist.end(); channellist_it++) {

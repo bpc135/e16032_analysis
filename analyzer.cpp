@@ -133,6 +133,7 @@ void analyze_dynode(int crateid, int slotid, int channum, vector<UShort_t> trace
     //check if we have already set it
     
     bdecay->pspmt.dyenergy = bdecay->adc[adcnumber].channel[channum]; //Pixie energy
+    
     bdecay->pspmt.dyecal = bdecay->adc[adcnumber].channel[channum] + random3->Rndm();
     bdecay->pspmt.dytime = bdecay->time[adcnumber].timefull[channum]; //time
     

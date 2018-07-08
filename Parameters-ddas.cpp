@@ -563,6 +563,10 @@ void bdecayPSPMT::Reset()
   memset(atdiffmin,0,257*sizeof(double));
   memset(aeventtdc,0,257*sizeof(double));
 
+  memset(dyenergies,-1,10*sizeof(double));
+  memset(dyamps,-1,10*sizeof(double));
+  memset(dytimes,0,10*sizeof(double));
+
   memset(aamp,0,257*sizeof(double));
   memset(aampcal,0,257*sizeof(double));
   
@@ -599,6 +603,7 @@ void bdecayPSPMT::Reset()
   dytdiff = 0;
   dytdiffmin = 0;
   dyeventtdc = -1;
+  dymult = 0;
 
   testsig = -1;
   testamp = -1;

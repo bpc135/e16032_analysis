@@ -379,13 +379,17 @@ class bdecayPSPMT: public TObject
  public:
   //dynode
   double dyenergy;
+  double dyenergies[10];
+  double dyamps[10];
   double dyecal;
   double dyamp;
   double dyampcal;
   double dyarea;
   double dyareacal;
   int dyoverflow;
+  int dymult;
   double dytime;
+  double dytimes[10];
   double dytimemin;
   double dytdiff;  //time difference between dynode and anode with highest amplitude
   double dytdiffmin;  //time difference between dynode and anode with lowest amplitude

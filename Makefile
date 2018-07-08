@@ -3,7 +3,7 @@ CXX=g++
 CXXLD=g++
 CCLD=gcc
 
-CXXFLAGS=-g -I. -I/usr/include/tcl8.5 -pthread -fPIC -I/user/e16032/threadfit_dynode -I/usr/opt/ddas/2.2/include
+CXXFLAGS=-g -I. -I/usr/include/tcl8.5 -pthread -fPIC -I/user/e16032/threadfit -I/usr/opt/ddas/2.2/include
 CCFLAGS=$(CXXFLAGS)
 
 LDFLAGS= -L/usr/lib -lpthread -lrt
@@ -15,7 +15,7 @@ ROOTLDFLAGS  := $(shell root-config --ldflags)
 LIB_DIR=$(PWD)
 #LIB_DIR=/user/e16032/RootAnalysis_Scripted
 
-LIBS  = -lm $(ROOTGLIBS) -L$(LIB_DIR) -I. -lMinuit -Wl,-rpath,$(LIB_DIR) -lParameters-ddas -Wl,-rpath,/usr/opt/ddas/2.2/lib -lddaschannel -Wl,-rpath,/user/e16032/Utilities_root6  -L/user/e16032/Utilities_root6 -lPixie16Utilities -L/user/e16032/threadfit_dynode -Wl,-rpath,/user/e16032/threadfit_dynode -lDDASFitClasses 
+LIBS  = -lm $(ROOTGLIBS) -L$(LIB_DIR) -I. -lMinuit -Wl,-rpath,$(LIB_DIR) -lParameters-ddas -Wl,-rpath,/usr/opt/ddas/2.2/lib -lddaschannel -Wl,-rpath,/user/e16032/Utilities_root6  -L/user/e16032/Utilities_root6 -lPixie16Utilities -L/user/e16032/threadfit -Wl,-rpath,/user/e16032/threadfit -lDDASFitClasses 
 
 CXXFLAGS+=$(ROOTCFLAGS)
 O_FILES = correlator.o Variables-ddas.o main.o unpacker.o analyzer.o 

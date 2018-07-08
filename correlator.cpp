@@ -16,7 +16,7 @@
 
 #include "correlator.h"
 
-#define CORRELATION 7
+#define CORRELATION 5
 
 /****************************************
  * Correlation flags:                   *
@@ -198,18 +198,18 @@ double Correlator::Correlate(betadecay &bdecay, betadecayvariables &bdecayv,
       // xPos = bdecay.pspmt.aampmaxx;//(int)((bdecay.pspmt.loposxEcent50-1)*2.0 + 0.5) +1;
       // yPos  = bdecay.pspmt.aampmaxy;//(int)((bdecay.pspmt.loposyEcent50-1)*2.0 + 0.5) +1;
 
-      xPos = bdecay.pspmt.aminx;//(int)((bdecay.pspmt.loposxEcent50-1)*2.0 + 0.5) +1;
-      yPos  = bdecay.pspmt.aminy;//(int)((bdecay.pspmt.loposyEcent50-1)*2.0 + 0.5) +1;
+      xPos = bdecay.pspmt.aminimpx;//(int)((bdecay.pspmt.loposxEcent50-1)*2.0 + 0.5) +1;
+      yPos  = bdecay.pspmt.aminimpy;//(int)((bdecay.pspmt.loposyEcent50-1)*2.0 + 0.5) +1;
       
-      cout << "IMPLANT array " << xPos << " " << yPos << " " << currentTime << " " << bdecay.pin01.energy <<endl;
-      for(int y = 0; y<16; y++){
-          for(int x= 0; x<16; x++){
-            cout << std::setw(10) << implant[x][y].time / 1000000. << " " ;//" (" <<  std::setw(7) << tdiff[x][y][m] << ")";
-          }
-          cout << endl;
-      }
+      // cout << "IMPLANT array " << xPos << " " << yPos << " " << currentTime << " " << bdecay.pin01.energy <<endl;
+      // for(int y = 0; y<16; y++){
+      //     for(int x= 0; x<16; x++){
+      //       cout << std::setw(10) << implant[x][y].time / 1000000. << " " ;//" (" <<  std::setw(7) << tdiff[x][y][m] << ")";
+      //     }
+      //     cout << endl;
+      // }
 
-      cout << endl;
+      // cout << endl;
 
       
        
@@ -260,15 +260,15 @@ double Correlator::Correlate(betadecay &bdecay, betadecayvariables &bdecayv,
 	    bdecay.corr.idyamp = implant[xPos][yPos].dyamp;
 
 
-	    cout << "UPDATED IMPLANT array " << endl;
-	    for(int y = 0; y<16; y++){
-	      for(int x= 0; x<16; x++){
-		cout << std::setw(10) << implant[x][y].time /1000000. << " " ;//" (" <<  std::setw(7) << tdiff[x][y][m] << ")";
-	      }
-	      cout << endl;
-	    }
+	    // cout << "UPDATED IMPLANT array " << endl;
+	    // for(int y = 0; y<16; y++){
+	    //   for(int x= 0; x<16; x++){
+	    // 	cout << std::setw(10) << implant[x][y].time /1000000. << " " ;//" (" <<  std::setw(7) << tdiff[x][y][m] << ")";
+	    //   }
+	    //   cout << endl;
+	    // }
 	    
-	    cout << endl;
+	    // cout << endl;
 
 
 	    
@@ -279,7 +279,7 @@ double Correlator::Correlate(betadecay &bdecay, betadecayvariables &bdecayv,
       // get position info., from high gain info.
       xPos = bdecay.pspmt.amaxx;//(int)((bdecay.pspmt.posxEcent-1)*2.0 + 0.5)+1;
       yPos  = bdecay.pspmt.amaxy;//(int)((bdecay.pspmt.posyEcent-1)*2.0 + 0.5)+1;
-      cout << "DECAY INFO " << xPos << " " << yPos << " " << currentTime << endl;
+      //cout << "DECAY INFO " << xPos << " " << yPos << " " << currentTime << endl;
       //if(currentTime > 535.357) exit(1);
       
 
@@ -317,17 +317,18 @@ double Correlator::Correlate(betadecay &bdecay, betadecayvariables &bdecayv,
       int tempxpos = 500;
       int tempypos = 500;
 
-      cout << "TEMP CORR array " << xPos << " " << yPos << " " <<endl;
-      if ( (xPos!=500 && yPos !=500)){
-	cout <<  currentTime -  implant[xPos][yPos].time << endl;
-	for(int y = 0; y<7; y++){
-          for(int x= 0; x<7; x++){
-            cout << std::setw(11) << decay_pixel[x][y] << " " ;//" (" <<  std::setw(7) << tdiff[x][y][m] << ")";
-          }
-          cout << endl;
-	}
-      }
-      cout << endl;     
+      // cout << "TEMP CORR array " << xPos << " " << yPos << " " <<endl;
+      // if ( (xPos!=500 && yPos !=500)){
+      // 	cout <<  currentTime -  implant[xPos][yPos].time << endl;
+      // 	for(int y = 0; y<7; y++){
+      //     for(int x= 0; x<7; x++){
+      //       cout << std::setw(11) << decay_pixel[x][y] << " " ;//" (" <<  std::setw(7) << tdiff[x][y][m] << ")";
+      //     }
+      //     cout << endl;
+      // 	}
+      // }
+      // cout << endl;  
+      
       
       if (implanted) {
 	for (int i=(-corr_limit); i<(corr_limit+1); i++) {
@@ -357,16 +358,16 @@ double Correlator::Correlate(betadecay &bdecay, betadecayvariables &bdecayv,
       yPos = tempypos;
 
 
-      cout << "DECAY array " << xPos << " " << yPos << " " <<endl;
-      if ( (xPos!=500 && yPos !=500)) cout <<  currentTime - implant[xPos][yPos].time << endl;
-      for(int y = 0; y<16; y++){
-          for(int x= 0; x<16; x++){
-            cout << std::setw(7) << currentTime - implant[x][y].time << " " ;//" (" <<  std::setw(7) << tdiff[x][y][m] << ")";
-          }
-          cout << endl;
-      }
+      // cout << "DECAY array " << xPos << " " << yPos << " " <<endl;
+      // if ( (xPos!=500 && yPos !=500)) cout <<  currentTime - implant[xPos][yPos].time << endl;
+      // for(int y = 0; y<16; y++){
+      //     for(int x= 0; x<16; x++){
+      //       cout << std::setw(7) << currentTime - implant[x][y].time << " " ;//" (" <<  std::setw(7) << tdiff[x][y][m] << ")";
+      //     }
+      //     cout << endl;
+      // }
 
-      cout << endl;
+      // cout << endl;
       
       
       // sanity check on position
