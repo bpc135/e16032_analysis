@@ -17,12 +17,12 @@ using namespace std;
 void Chain(TChain *chain, int run_num) {
 
   //modify these directories if the input/output directories change
-  string infile_dir = "/mnt/analysis/e16032/analyzed_rootfiles/";
+  string infile_dir = "/data/e16032/analyzed_rootfiles/";
   vector<string> files;
 
   //find all segments for the given run number in the histo_segments directory
   string run_num_str = Form("%04d",run_num);
-  string filemodifier = "-e16032_analysis.root";
+  string filemodifier = "-e16032_BC.root";
   
   DIR *dir;
   struct dirent *ent;

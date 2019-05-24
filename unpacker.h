@@ -12,7 +12,7 @@
 //File Includes
 #include "Parameters-ddas.h"
 #include "Variables-ddas.h"
-#include "/user/e16032/Utilities_root6/Pixie16Utilities.h"
+#include "/home/bpc135/Utilities_root6/Pixie16Utilities.h"
 
 //ROOT includes
 #include "TTree.h"
@@ -31,5 +31,8 @@ void reset_channel_list(vector<DDASRootFitHit*> channellist,  vector<DDASRootFit
 int unpack_event(int eventnum, betadecay *bdecay, betadecayvariables *bdecayv, vector<DDASRootFitHit*> channellist,vector<DDASRootFitHit*>::iterator channellist_it, Pixie16Utilities *utils[]);
 
 void unpack_double_pulse(int eventnum, betadecay *bdecay, vector <RootHitExtension> *fitdata);
-  
+
+void UnpackerInit();
+Double_t f2DLorentz(Double_t *x, Double_t *par); 
+
 #endif

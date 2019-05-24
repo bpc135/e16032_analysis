@@ -283,6 +283,7 @@ class bdecayCorr: public TObject
   int ctof;
   //
   double dtimecal;
+  double dDeltaTIon;
   double dtime;
   double xPos; // yx
   double yPos; // yx
@@ -444,6 +445,18 @@ class bdecayPSPMT: public TObject
   int amaxy;
   int aminx;
   int aminy;
+
+  double scale;  // scale factor of lorentz fit
+  double xpos;   // xposition from 2D fit
+  double ypos;   // yposition from 2D fit
+  double chisq;  // crude user defined chisq with threshold
+  double histsum; // integral over istogram of anode raw energies
+  double fitintegral; // fit integral over pspmt
+  double fitintegralfull; // fit integral over very large range
+  double sigmax; //lorentzian sigma in x
+  double sigmay; //lorentzian sigma in y
+  
+
   int aminimpx;
   int aminimpy;
   double amaxtime;

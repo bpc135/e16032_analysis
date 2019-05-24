@@ -4,7 +4,11 @@
 //ROOT INCLUDES
 #include "TRandom.h"
 #include "TRandom3.h"
-
+#include "TH1.h"
+#include "TH2.h"
+#include "TF1.h"
+#include "TF2.h"
+#include "math.h"
 
 
 /*****************************************/
@@ -12,6 +16,8 @@
 /* Fill parameters with raw data.        */
 /*                                       */
 /*****************************************/
+
+
 
 TRandom3 *random3 = new TRandom3();
 
@@ -57,7 +63,7 @@ void analyze_dynode(int crateid, int slotid, int channum, vector<UShort_t> trace
   
   */
   
-  //THIS IS THE ONE FOR THE TEST DATA
+  //TH  IS IS THE ONE FOR THE TEST DATA
   //scaling factors for differences in bit depth between the modules
   double scale_fact[20] = {1,1,1,1,0.25,0.25,0.25,0.0625,0.0625,0.25,0.25,0.25,0.25,0.25,0.0625,0.0625,0.25,0.25,0.25,1.};
   
@@ -113,7 +119,7 @@ void analyze_dynode(int crateid, int slotid, int channum, vector<UShort_t> trace
     area = utils[modnum]->GetTraceArea();
     areacal = area * scale_fact[modnum];
     
-    utils[modnum]->CheckOverflowUnderflow(trace,5,maxsize[modnum]);  //cheating, 16 modules are running with low amplitude sinals so all should be fairly small
+    utils[modnum]->CheckOverflowUnderflow(trace,5,maxsize[modnum]);  //cheating, 16 modules are running with low amplitude signals so all should be fairly small
     overflow = utils[modnum]->GetOverflow();
   }
 
@@ -160,7 +166,7 @@ void analyze_event(int crateid, int slotid, int channum, vector<UShort_t> trace,
   //calibrate and threshold check
   double starttime;
   starttime = bdecay->clock.initial;
-  
+ 
   double currenttime;
 
   unsigned int adcnumber = 0;
@@ -658,7 +664,7 @@ void analyze_event(int crateid, int slotid, int channum, vector<UShort_t> trace,
 	bdecay->pspmt.ahit[pix] = 1;
 	bdecay->pspmt.aenergy[pix] = bdecay->adc[adcnumber].channel[channum];
 	bdecay->pspmt.aeventtdc[pix] = (currenttime - starttime) + 3000.;
-	bdecay->pspmt.aecal[pix] = bdecay->pspmt.aenergy[pix]*bdecayv->pspmt.slope[pix];
+	bdecay->pspmt.aecal[pix] = bdecay->pspmt.aenergy[pix];//*bdecayv->pspmt.slope[pix];
 	bdecay->pspmt.aamp[pix] = amplitude;
 	bdecay->pspmt.aampcal[pix] = amplitudecal;
 	bdecay->pspmt.aarea[pix] = area;

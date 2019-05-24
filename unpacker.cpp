@@ -10,6 +10,41 @@ extern "C" {
 #include "functions.h"
 }
 
+#include "TH1.h"
+#include "TH2.h"
+#include "TF1.h"
+#include "TF2.h"
+#include "math.h"
+
+
+TH2D *hAnodeRawEnergy;
+const int pspmtsizex = 16;
+const int pspmtsizey = 16;
+
+
+
+Double_t f2DLorentz(Double_t *x, Double_t *par) {
+
+  Double_t scale = par[0];
+  Double_t gammax = par[1];
+  Double_t gammay = par[2];
+  Double_t posx  = par[3];
+  Double_t posy  = par[4];
+
+  Double_t xterm = 1 / (TMath::Power(gammax,2) + TMath::Power((x[0]-posx),2));
+  Double_t yterm = 1 / (TMath::Power(gammay,2) + TMath::Power((x[1]-posy),2));
+  
+  Double_t val = ( (gammax*gammay)/(TMath::Pi()*TMath::Pi()) ) * par[0] * xterm * yterm;
+  return val;
+  
+}
+
+void UnpackerInit(){
+
+  hAnodeRawEnergy = new TH2D("hAnodeRawEnergy","hAnodeRawEnergy",pspmtsizex,0,pspmtsizex,pspmtsizey,0,pspmtsizey);
+  
+}
+
 //define the utilities for the various modules
 void SetInitialPixie16Utilities(Pixie16Utilities *myUtils/*, vector<UShort_t> tr*/, int adcfreq, int modnum){
 
@@ -178,7 +213,7 @@ void SetInitialPixie16Utilities(Pixie16Utilities *myUtils/*, vector<UShort_t> tr
 
 //specify the folder where the default calibration files are found.  This folder
 //has the default calibration files for the LaBr3 and Segas
-char calDefaultPath[] = "/user/e16032/RootAnalysis_Scripted_BC/e16032_analysis_full/cal";
+char calDefaultPath[] = "/projects/e16032/RootAnalysis_Scripted_BC/e16032_analysis_full/cal";
 
 //specify each default calibration files
 string SegaDefault;
@@ -259,8 +294,8 @@ int unpack_data(TTree *tree_in, TTree *tree_out, string Run_Number  ) {
   char PSPMTInitTimeName[100];
 
   string tempsega;
-  //tempsega = "SeGAInit_"+Run_Number.substr(0,4)+".txt";
-  tempsega = "SeGAInit_basic.txt";
+  tempsega = "SeGAInit_"+Run_Number.substr(0,4)+".txt";
+  //tempsega = "SeGAInit_basic.txt";
   SegaDefault = tempsega;
 
   string templabr3;
@@ -305,6 +340,37 @@ int unpack_data(TTree *tree_in, TTree *tree_out, string Run_Number  ) {
   
   //Make the relevant output stuff in the tree
   tree_out->Branch("rootout", "rootdataout", &rootout, 32000,99);
+
+  // disable output of pspmt anode information
+  tree_out->SetBranchStatus("pspmt.a*", 0);
+  tree_out->SetBranchStatus("pspmt.lo*", 0);
+  tree_out->SetBranchStatus("pspmt.baseline*", 0);
+  tree_out->SetBranchStatus("pspmt.ratio*", 0);
+  tree_out->SetBranchStatus("pspmt.pixmult*", 0);
+  tree_out->SetBranchStatus("corr.gd*", 0);
+  tree_out->SetBranchStatus("sega.timecfd*", 0);
+  tree_out->SetBranchStatus("sega.timelow*", 0);
+  tree_out->SetBranchStatus("sega.timehigh*", 0);
+  tree_out->SetBranchStatus("sega.eventtdc*", 0);
+  tree_out->SetBranchStatus("sega.goodenergy*", 0);
+  tree_out->SetBranchStatus("sega.itdc*", 0);
+  tree_out->SetBranchStatus("sega.dtdc*", 0);
+  tree_out->SetBranchStatus("sega.energy*", 0);
+  tree_out->SetBranchStatus("labr3.a*", 0);
+  tree_out->SetBranchStatus("labr3.timecfd*", 0);
+  tree_out->SetBranchStatus("labr3.timelow*", 0);
+  tree_out->SetBranchStatus("labr3.timehigh*", 0);
+  tree_out->SetBranchStatus("labr3.eventtdc*", 0);
+  tree_out->SetBranchStatus("labr3.goodenergy*", 0);
+  tree_out->SetBranchStatus("labr3.itdc*", 0);
+  tree_out->SetBranchStatus("labr3.dtdc*", 0);
+  tree_out->SetBranchStatus("labr3.tdiff*", 0);
+  tree_out->SetBranchStatus("labr3.dynode_tdiff*", 0);
+  tree_out->SetBranchStatus("labr3.timecfd_filt*", 0);
+  tree_out->SetBranchStatus("labr3.cfdtrigpt_filt*", 0);
+  tree_out->SetBranchStatus("ddasdiagnostics.*", 0);
+  tree_out->SetBranchStatus("clock.*", 0);
+  tree_out->SetBranchStatus("clyc.*", 0);
   
   //Find the number of events in a file
   Int_t nevents = tree_in->GetEntries();
@@ -323,6 +389,8 @@ int unpack_data(TTree *tree_in, TTree *tree_out, string Run_Number  ) {
   //nevents = 100;
   int double_events = 0;
 
+  UnpackerInit();
+  
   //Loop over all the events in the file
   for (Int_t ii=0; ii<nevents; ii++) {
     // cout << "---------- new event\n";
@@ -334,7 +402,7 @@ int unpack_data(TTree *tree_in, TTree *tree_out, string Run_Number  ) {
     //cout << "Events processed " << ii << " - percent done " << (int)(ii/tenthper)*0.1 << "%"<<endl;
     //}
     //check with only 1% of the file
-    // if( (ii > 0) && (ii % fiveper) == 0) {
+    // if( (ii > 0) && (ii % oneper) == 0) {
     //   break;
     // }
 
@@ -442,6 +510,11 @@ int unpack_event(int eventnum, betadecay *bdecay, betadecayvariables *bdecayv,ve
   bdecay->Reset();
   bdecayv->hit.Initialize();
   //cout<<endl<<endl;
+
+  //Reset the anode raw energy spectrum
+  hAnodeRawEnergy->Reset("M");
+  hAnodeRawEnergy->Clear();
+ 
   
   //
   int eventsize = channellist.size();
@@ -742,6 +815,9 @@ int unpack_event(int eventnum, betadecay *bdecay, betadecayvariables *bdecayv,ve
     if(bdecay->pspmt.aecal[i]>0){
 
       //   cout<<"Eventnum: "<<eventnum<<"  i: "<<i<<" \ty: "<<ypix<<" \tx: "<<xpix<<" \tE: "<<bdecay->pspmt.aecal[i]<<"\t A: "<<bdecay->pspmt.aampcal[i]<<"  T: "<<bdecay->pspmt.atime[i]<<"  DyT: "<<bdecay->pspmt.dytime<<" Diff: "<<bdecay->pspmt.atdiff[i]<<endl;    
+
+      //fill specturm to fit
+      hAnodeRawEnergy->Fill(xpix,ypix,bdecay->pspmt.aecal[i]);
       
       //pixieEcent
       bdecay->pspmt.posxEcent += xpix * bdecay->pspmt.aecal[i];
@@ -795,6 +871,50 @@ int unpack_event(int eventnum, betadecay *bdecay, betadecayvariables *bdecayv,ve
     }
   }
 
+  //anode energy distribution filled, calc stuff
+  if(bdecay->pspmt.dyenergy>0){
+    TF2 *fit_2D_lormap = new TF2("fit_2D_lormap",f2DLorentz,2,14,2,14,5);
+    TF2 *display_2D_lormap = new TF2("display_2D_lormap",f2DLorentz,2,14,2,14,5);
+    
+    fit_2D_lormap->SetParameter(0,bdecay->pspmt.amax);
+    fit_2D_lormap->SetParLimits(0,0,1000000000);
+    fit_2D_lormap->SetParameter(1,2);
+    fit_2D_lormap->SetParameter(2,2);
+    fit_2D_lormap->SetParameter(3,bdecay->pspmt.amaxx);
+    fit_2D_lormap->SetParLimits(3,TMath::Max(bdecay->pspmt.amaxx-3.,2.0),TMath::Min(bdecay->pspmt.amaxx+3.,14.0));
+    fit_2D_lormap->SetParameter(4,bdecay->pspmt.amaxy);
+    fit_2D_lormap->SetParLimits(4,TMath::Max(bdecay->pspmt.amaxy-3.,2.0),TMath::Min(bdecay->pspmt.amaxy+3.,14.0));
+    
+    hAnodeRawEnergy->Fit("fit_2D_lormap","RMQLN");
+    
+    Double_t results[5];
+    results[0] = fit_2D_lormap->GetParameter(0);
+    results[1] = fit_2D_lormap->GetParameter(1);
+    results[2] = fit_2D_lormap->GetParameter(2);
+    results[3] = fit_2D_lormap->GetParameter(3);
+    results[4] = fit_2D_lormap->GetParameter(4);
+    
+    //loop over and calculate crude chisquare
+    Double_t chisqsum = 0;
+    for(int xx=0; xx<pspmtsizex;xx++){
+      for(int yy=0; yy<pspmtsizey;yy++){
+	if(hAnodeRawEnergy->GetBinContent(xx+1,yy+1) > (0.05*bdecay->pspmt.amax)){
+	  Double_t diff = (fit_2D_lormap->Eval(xx+0.5,yy+0.5)-hAnodeRawEnergy->GetBinContent(xx+1,yy+1));
+	  chisqsum += diff*diff;
+	}
+      }
+    }
+    bdecay->pspmt.chisq = TMath::Sqrt(chisqsum)/(pspmtsizex*pspmtsizey);
+    bdecay->pspmt.histsum;
+    bdecay->pspmt.fitintegral;
+    bdecay->pspmt.fitintegralfull;
+    bdecay->pspmt.scale = results[0];
+    bdecay->pspmt.xpos = results[3];
+    bdecay->pspmt.ypos = results[4];
+    bdecay->pspmt.sigmax = results[1];
+    bdecay->pspmt.sigmay = results[2];
+  }
+    
   bdecay->pspmt.asumcent = asumcent;
   bdecay->pspmt.asumcent50 = asumcent50;
   bdecay->pspmt.aampsumcent = aampsumcent;

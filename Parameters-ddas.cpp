@@ -419,6 +419,7 @@ void bdecayCorr::Reset()
   ctof = -1;
   
   dtimecal = -1;
+  dDeltaTIon = -1;
   dtime = -1;
   
   dde1 = -1;
@@ -647,6 +648,18 @@ void bdecayPSPMT::Reset()
   amaxy = 0;
   aminx = 0;
   aminy = 0;
+
+  scale = 0;
+  xpos = 0;   // xposition from 2D fit
+  ypos = 0;   // yposition from 2D fit
+  chisq = 0;  // crude user defined chisq with threshold
+  histsum = 0; // integral over istogram of anode raw energies
+  fitintegral = 0; // fit integral over pspmt
+  fitintegralfull = 0; // fit integral over very large range
+  sigmax = 0; //lorentzian sigma in x
+  sigmay = 0; //lorentzian sigma in y
+  
+
   aminimpx = 0;
   aminimpy = 0;
   amaxtime = 0;
