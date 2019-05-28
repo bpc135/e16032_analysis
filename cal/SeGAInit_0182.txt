@@ -1,0 +1,118 @@
+###############################################################
+#  SeGAInit.tcl -- SeGA initialization file
+#  SpecTcl source file: 01016_bdecayspec.cpp
+#  Last modified 2004/04/24 by add
+#
+#  Set SeGA energy calibration variables
+#  All intercepts are based on a 13-bit scale
+#
+#  Sega calibration from SRM calibration by ??? 
+###############################################################
+
+# 2nd order SeGA energy calibration parameters 
+# (NEED TO BE UPDATED FOR e08020)
+#
+01 0.0
+02 0.0
+03 0.0
+04 0.0
+05 0.0
+06 0.0
+07 0.0
+08 0.0
+09 0.0
+10 0.0
+11 0.0
+12 0.0
+13 0.0
+14 0.0
+15 0.0
+16 0.0
+#
+#bdecayv.sega.slope
+#
+01 0.129654
+02 0.12894
+03 0.0887279
+04 0.128791
+05 0.12756
+06 0.128405
+07 0.12099
+08 0.128322
+09 0.133445
+10 0.133207
+11 0.135921
+12 0.13403
+13 0.124144
+14 0.134577
+15 0.134352
+16 0.143102
+#
+#bdecayv.sega.intercept
+#
+01 -0.17637
+02 -0.408812
+03 -0.822088
+04 -0.379001
+05 0.462915
+06 -0.502445
+07 -0.364177
+08 -0.794896
+09 -0.306007
+10 0.348439
+11 0.276138
+12 0.241183
+13 -0.314096
+14 -0.687463
+15 0.974795
+16 0.269523
+#
+# bdecayv.sega.thresh
+#
+# Set SeGA energy thresholds
+# All intercepts are based on a 13-bit scale
+01 1
+02 1
+03 1
+04 1
+05 1
+06 1
+07 1
+08 1
+09 1
+10 1
+11 1
+12 1
+13 1
+14 1
+15 1
+16 1
+#
+#bdecayv.sega.hithresh
+#
+# All intercepts are based on a 13-bit scale
+01 3880
+02 4300
+03 4100
+04 3850
+05 2700
+06 4300
+07 4300
+08 4150
+09 4000
+10 4000
+11 4400
+12 3900
+13 4300
+14 4200
+15 4100
+16 4500
+#
+#bdecayv.sega.lotime
+#
+# Set sega.time limits based on 12 bit spectrum 
+0
+#bdecayv.sega.hitime
+65536
+# End of SeGA variable initialization
+
